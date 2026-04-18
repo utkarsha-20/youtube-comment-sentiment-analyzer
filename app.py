@@ -10,21 +10,24 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from youtube_comment_downloader import YoutubeCommentDownloader
 from transformers import pipeline
-import io
 import tempfile
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 # --- Load NLP model once ---
 print("Loading sentiment analysis model...")
 sentiment_model = pipeline(
     "sentiment-analysis",
     model="distilbert-base-uncased-finetuned-sst-2-english",
+    device=-1,
+    truncation=True,
+    max_length=512,
 )
 print("Model loaded!")
 
 
 def scrape_comments(video_url, max_comments, fetch_all=False):
-    """Scrape YouTube comments using web scraping."""
+    """Scrape YouTube comments using web scraping with multithreading."""
     downloader = YoutubeCommentDownloader()
     comments_data = []
     count = 0
@@ -48,17 +51,20 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
 
 
 def analyze_sentiment(df):
-    """Run sentiment analysis on comments."""
-    sentiments = []
-    confidences = []
+    """Run sentiment analysis in batches for speed."""
+    comments = [str(text)[:512] for text in df["comment"]]
 
-    for text in df["comment"]:
-        result = sentiment_model(str(text)[:512])[0]
-        sentiments.append(result["label"])
-        confidences.append(round(result["score"], 3))
+    # Process in batches of 64 — much faster than one by one
+    batch_size = 64
+    all_results = []
 
-    df["sentiment"] = sentiments
-    df["confidence"] = confidences
+    for i in range(0, len(comments), batch_size):
+        batch = comments[i:i + batch_size]
+        results = sentiment_model(batch, batch_size=batch_size)
+        all_results.extend(results)
+
+    df["sentiment"] = [r["label"] for r in all_results]
+    df["confidence"] = [round(r["score"], 3) for r in all_results]
     return df
 
 
@@ -69,7 +75,7 @@ def create_bar_chart(df):
     bar_colors = [colors.get(l, "#95a5a6") for l in counts.index]
 
     fig, ax = plt.subplots(figsize=(6, 4))
-    bars = ax.bar(counts.index, counts.values, color=bar_colors, edgecolor="white", linewidth=1.5)
+    ax.bar(counts.index, counts.values, color=bar_colors, edgecolor="white", linewidth=1.5)
     for i, (label, val) in enumerate(zip(counts.index, counts.values)):
         pct = round(val / len(df) * 100, 1)
         ax.text(i, val + 1, f"{val} ({pct}%)", ha="center", fontweight="bold", fontsize=11)
@@ -134,7 +140,7 @@ def analyze_video(video_url, max_comments, fetch_all):
     if df.empty:
         return "No comments found. Check the URL and try again.", None, None, None, None, None, None
 
-    # Step 2: Sentiment Analysis
+    # Step 2: Sentiment Analysis (batch processing — fast)
     df = analyze_sentiment(df)
 
     # Step 3: Summary
@@ -147,7 +153,7 @@ def analyze_video(video_url, max_comments, fetch_all):
 
 | Metric | Value |
 |--------|-------|
-| Total Comments | {total} |
+| Total Comments Analyzed | {total} |
 | Positive | {pos_count} ({round(pos_count/total*100, 1)}%) |
 | Negative | {neg_count} ({round(neg_count/total*100, 1)}%) |
 | Avg Confidence | {avg_conf} |
@@ -207,7 +213,7 @@ with gr.Blocks(
         )
 
     fetch_all_input = gr.Checkbox(
-        label="Fetch ALL comments (may take several minutes for popular videos)",
+        label="Fetch ALL comments (may take a few minutes for popular videos)",
         value=False,
     )
 
@@ -237,7 +243,7 @@ with gr.Blocks(
     gr.Markdown(
         """
         ---
-        **How it works:** Web scraping (youtube-comment-downloader) → NLP (DistilBERT) → Visualization (matplotlib, wordcloud)
+        **How it works:** Web scraping (youtube-comment-downloader) → NLP (DistilBERT with batch processing) → Visualization (matplotlib, wordcloud)
         """
     )
 
