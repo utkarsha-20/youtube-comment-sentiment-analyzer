@@ -6,3 +6,4 @@ transformers
 torch
 matplotlib
 wordcloud
+streamlit
