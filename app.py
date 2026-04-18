@@ -49,17 +49,13 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     comments_data = []
     count = 0
 
-    # Try sort_by=0 (newest) first, fallback to sort_by=1 (popular), then no sorting
-    comments = None
-    for sort in [0, 1]:
-        try:
-            comments = downloader.get_comments_from_url(video_url, sort_by=sort)
-            break
-        except Exception:
-            continue
-
-    if comments is None:
+    # Get comments without sorting to avoid "Failed to set sorting" error
+    try:
         comments = downloader.get_comments_from_url(video_url)
+    except Exception:
+        # Extract video ID and try with get_comments method
+        video_id = video_url.split("v=")[1].split("&")[0] if "v=" in video_url else video_url
+        comments = downloader.get_comments(video_id)
 
     for comment in comments:
         if not fetch_all and count >= max_comments:
