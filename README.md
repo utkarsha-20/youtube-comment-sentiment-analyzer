@@ -38,14 +38,12 @@ YouTube URL → Web Scraping → Dataset (CSV) → Sentiment Analysis (NLP) → 
 ## Project Structure
 
 ```
-├── app.py                 # Streamlit web app (main entry point)
+├── app.py                 # Gradio web app (main entry point)
 ├── main.py                # CLI pipeline (scrape → analyze → visualize)
 ├── scraper.py             # Web scraping module (YouTube comments)
 ├── nlp_analysis.py        # Sentiment analysis using HuggingFace Transformers
 ├── visualize.py           # Charts and word clouds (CLI version)
 ├── requirements.txt       # Python dependencies
-├── .streamlit/
-│   └── config.toml        # Streamlit theme configuration
 └── README.md
 ```
 
@@ -60,7 +58,7 @@ pip install -r requirements.txt
 ### 2. Run the Web App
 
 ```bash
-streamlit run app.py
+python app.py
 ```
 
 ### 3. Or Run via CLI
@@ -69,16 +67,9 @@ streamlit run app.py
 python main.py
 ```
 
-## Deploy on Hugging Face Spaces
-
-1. Go to [huggingface.co/new-space](https://huggingface.co/new-space)
-2. Select **Streamlit** as SDK
-3. Push this repo to the Space
-4. It auto-deploys
-
 ## Technologies Used
 
-- **Web App**: `Streamlit`
+- **Web App**: `Gradio`
 - **Web Scraping**: `youtube-comment-downloader`
 - **NLP**: `transformers` (HuggingFace), `DistilBERT` model
 - **Data Processing**: `pandas`
