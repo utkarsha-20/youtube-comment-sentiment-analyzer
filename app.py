@@ -128,7 +128,7 @@ def create_pie_chart(df):
 
 
 def create_wordcloud(df, sentiment, colormap):
-    """Create word cloud for a specific sentiment."""
+    """Create word cloud for a specific sentiment with filtered words."""
     text = " ".join(df[df["sentiment"] == sentiment]["comment"].dropna().astype(str))
     if not text.strip():
         fig, ax = plt.subplots(figsize=(8, 4))
@@ -136,7 +136,38 @@ def create_wordcloud(df, sentiment, colormap):
         ax.axis("off")
         return fig
 
-    wc = WordCloud(width=800, height=400, background_color="white", colormap=colormap, max_words=80).generate(text)
+    # Words to exclude — common words that don't indicate sentiment
+    stop_words = {
+        "the", "a", "an", "is", "it", "i", "you", "he", "she", "we", "they",
+        "my", "your", "his", "her", "our", "this", "that", "these", "those",
+        "am", "are", "was", "were", "be", "been", "being", "have", "has", "had",
+        "do", "does", "did", "will", "would", "could", "should", "may", "might",
+        "shall", "can", "to", "of", "in", "for", "on", "with", "at", "by",
+        "from", "as", "into", "about", "but", "or", "and", "not", "no", "so",
+        "if", "than", "too", "very", "just", "also", "more", "most", "all",
+        "each", "every", "both", "few", "some", "any", "other", "one", "two",
+        "up", "out", "its", "what", "which", "who", "when", "where", "how",
+        "me", "him", "them", "here", "there", "then", "now", "only", "own",
+        "same", "much", "even", "still", "after", "before", "because", "while",
+        "de", "el", "la", "en", "que", "por", "un", "una", "los", "las",
+        "del", "al", "es", "ya", "se", "le", "da", "di", "ke", "ni", "ka",
+        "dan", "ini", "itu", "yang", "dengan", "untuk", "pada",
+        "como", "mas", "mais", "vai", "com", "pra", "nos", "das", "dos",
+        "video", "comment", "like", "watch", "channel", "subscribe",
+    }
+
+    # Add opposite-sentiment words to stop list
+    if sentiment == "NEGATIVE":
+        stop_words.update({"love", "great", "good", "best", "amazing", "awesome",
+                           "beautiful", "perfect", "excellent", "wonderful", "fantastic",
+                           "cool", "nice", "hope", "happy", "gracias", "hermosos",
+                           "grande", "indah", "love"})
+    else:
+        stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
+                           "waste", "poor", "ugly", "stupid", "awful", "annoying"})
+
+    wc = WordCloud(width=800, height=400, background_color="white", colormap=colormap,
+                   max_words=80, stopwords=stop_words).generate(text)
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.imshow(wc, interpolation="bilinear")
     ax.axis("off")
