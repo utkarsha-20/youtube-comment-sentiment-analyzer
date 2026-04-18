@@ -11,8 +11,6 @@ from wordcloud import WordCloud
 from youtube_comment_downloader import YoutubeCommentDownloader
 from transformers import pipeline
 import tempfile
-import os
-from concurrent.futures import ThreadPoolExecutor
 
 # --- Load NLP model once ---
 print("Loading sentiment analysis model...")
@@ -201,11 +199,12 @@ def analyze_video(video_url, max_comments, fetch_all):
     # Step 5: Data table
     display_df = df[["comment", "author", "date", "likes", "sentiment", "confidence"]]
 
-    # Step 6: CSV download
-    csv_path = os.path.join(tempfile.gettempdir(), "sentiment_results.csv")
-    df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    # Step 6: CSV download — save to a temp file Gradio can serve
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv", prefix="sentiment_results_")
+    df.to_csv(tmp.name, index=False, encoding="utf-8-sig")
+    tmp.close()
 
-    return summary, bar_chart, pie_chart, wc_positive, wc_negative, display_df, csv_path
+    return summary, bar_chart, pie_chart, wc_positive, wc_negative, display_df, tmp.name
 
 
 # --- Gradio UI ---
