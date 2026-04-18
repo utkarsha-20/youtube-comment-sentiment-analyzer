@@ -23,7 +23,7 @@ sentiment_model = pipeline(
 print("Model loaded!")
 
 
-def scrape_comments(video_url, max_comments):
+def scrape_comments(video_url, max_comments, fetch_all=False):
     """Scrape YouTube comments using web scraping."""
     downloader = YoutubeCommentDownloader()
     comments_data = []
@@ -32,7 +32,7 @@ def scrape_comments(video_url, max_comments):
     comments = downloader.get_comments_from_url(video_url, sort_by=0)
 
     for comment in comments:
-        if count >= max_comments:
+        if not fetch_all and count >= max_comments:
             break
         text = comment.get("text", "").strip()
         if text:
@@ -118,7 +118,7 @@ def create_wordcloud(df, sentiment, colormap):
     return fig
 
 
-def analyze_video(video_url, max_comments):
+def analyze_video(video_url, max_comments, fetch_all):
     """Main function: scrape → analyze → visualize."""
     if not video_url or not video_url.strip():
         return "Please enter a YouTube URL.", None, None, None, None, None, None
@@ -127,7 +127,7 @@ def analyze_video(video_url, max_comments):
 
     # Step 1: Scrape
     try:
-        df = scrape_comments(video_url.strip(), max_comments)
+        df = scrape_comments(video_url.strip(), max_comments, fetch_all)
     except Exception as e:
         return f"Scraping failed: {e}", None, None, None, None, None, None
 
@@ -201,10 +201,15 @@ with gr.Blocks(
             scale=3,
         )
         count_input = gr.Slider(
-            minimum=50, maximum=500, value=200, step=50,
-            label="Number of Comments",
+            minimum=50, maximum=5000, value=500, step=50,
+            label="Number of Comments (ignored if 'Fetch All' is checked)",
             scale=1,
         )
+
+    fetch_all_input = gr.Checkbox(
+        label="Fetch ALL comments (may take several minutes for popular videos)",
+        value=False,
+    )
 
     analyze_btn = gr.Button("Analyze", variant="primary", size="lg")
 
@@ -225,7 +230,7 @@ with gr.Blocks(
     # Connect button
     analyze_btn.click(
         fn=analyze_video,
-        inputs=[url_input, count_input],
+        inputs=[url_input, count_input, fetch_all_input],
         outputs=[summary_output, bar_chart, pie_chart, wc_pos, wc_neg, data_table, csv_download],
     )
 
