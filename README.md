@@ -3,8 +3,8 @@ title: YouTube Comment Sentiment Analyzer
 emoji: 🎬
 colorFrom: red
 colorTo: green
-sdk: streamlit
-sdk_version: 1.44.1
+sdk: gradio
+sdk_version: 5.23.0
 app_file: app.py
 pinned: false
 ---
