@@ -145,7 +145,7 @@ def create_wordcloud(df, sentiment, colormap):
     return fig
 
 
-def analyze_video(video_url, max_comments, fetch_all):
+def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     """Main function: scrape → analyze → visualize."""
     if not video_url or not video_url.strip():
         return "Please enter a YouTube URL.", None, None, None, None, None, None
@@ -153,6 +153,7 @@ def analyze_video(video_url, max_comments, fetch_all):
     max_comments = int(max_comments)
 
     # Step 1: Scrape
+    progress(0.0, desc="Step 1/4: Scraping comments from YouTube...")
     try:
         df = scrape_comments(video_url.strip(), max_comments, fetch_all)
     except Exception as e:
@@ -162,9 +163,11 @@ def analyze_video(video_url, max_comments, fetch_all):
         return "No comments found. Check the URL and try again.", None, None, None, None, None, None
 
     # Step 2: Sentiment Analysis (batch processing — fast)
+    progress(0.3, desc=f"Step 2/4: Analyzing sentiment of {len(df)} comments...")
     df = analyze_sentiment(df)
 
     # Step 3: Summary
+    progress(0.7, desc="Step 3/4: Generating charts and word clouds...")
     total = len(df)
     pos_count = len(df[df["sentiment"] == "POSITIVE"])
     neg_count = len(df[df["sentiment"] == "NEGATIVE"])
@@ -200,10 +203,12 @@ def analyze_video(video_url, max_comments, fetch_all):
     display_df = df[["comment", "author", "date", "likes", "sentiment", "confidence"]]
 
     # Step 6: CSV download — save to a temp file Gradio can serve
+    progress(0.9, desc="Step 4/4: Preparing CSV download...")
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".csv", prefix="sentiment_results_")
     df.to_csv(tmp.name, index=False, encoding="utf-8-sig")
     tmp.close()
 
+    progress(1.0, desc="Done!")
     return summary, bar_chart, pie_chart, wc_positive, wc_negative, display_df, tmp.name
 
 
