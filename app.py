@@ -27,12 +27,22 @@ print("Model loaded!")
 
 
 def scrape_comments(video_url, max_comments, fetch_all=False):
-    """Scrape YouTube comments using web scraping with multithreading."""
+    """Scrape YouTube comments using web scraping."""
     downloader = YoutubeCommentDownloader()
     comments_data = []
     count = 0
 
-    comments = downloader.get_comments_from_url(video_url, sort_by=0)
+    # Try sort_by=0 (newest) first, fallback to sort_by=1 (popular), then no sorting
+    comments = None
+    for sort in [0, 1]:
+        try:
+            comments = downloader.get_comments_from_url(video_url, sort_by=sort)
+            break
+        except Exception:
+            continue
+
+    if comments is None:
+        comments = downloader.get_comments_from_url(video_url)
 
     for comment in comments:
         if not fetch_all and count >= max_comments:
