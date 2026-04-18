@@ -1,0 +1,8 @@
+youtube-comment-downloader
+beautifulsoup4
+requests
+pandas
+transformers
+torch
+matplotlib
+wordcloud
