@@ -26,8 +26,25 @@ sentiment_model = pipeline(
 print("Model loaded!")
 
 
+def clean_youtube_url(url):
+    """Clean YouTube URL — remove extra parameters, handle all URL formats."""
+    url = url.strip()
+    # Extract video ID from any YouTube URL format
+    video_id = None
+    if "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0].split("&")[0]
+    elif "v=" in url:
+        video_id = url.split("v=")[1].split("&")[0].split("#")[0]
+    elif "shorts/" in url:
+        video_id = url.split("shorts/")[1].split("?")[0].split("&")[0]
+    if video_id:
+        return f"https://www.youtube.com/watch?v={video_id}"
+    return url
+
+
 def scrape_comments(video_url, max_comments, fetch_all=False):
     """Scrape YouTube comments using web scraping."""
+    video_url = clean_youtube_url(video_url)
     downloader = YoutubeCommentDownloader()
     comments_data = []
     count = 0
