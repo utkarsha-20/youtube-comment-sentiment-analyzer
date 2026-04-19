@@ -431,6 +431,29 @@ label, .gr-form label {
     margin: 20px 0 !important;
 }
 
+/* Hide Hugging Face Space info popup */
+.gradio-container ~ div,
+.embed-container,
+div[data-testid="share-btn"],
+.share-button,
+.built-with,
+.svelte-1ipelgc,
+.space-info,
+footer .svelte-1rjryqp,
+.gr-prose.svelte-1ipelgc,
+.info.svelte-1ipelgc,
+div.absolute.bottom-0,
+div.fixed.bottom-0,
+.overflow-hidden.absolute,
+div[class*="space-info"],
+div[class*="embed"],
+.gradio-container + div {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 /* Footer */
 .app-footer {
     font-size: 12px !important;
