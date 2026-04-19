@@ -9,9 +9,9 @@ import gradio as gr
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from youtube_comment_downloader import YoutubeCommentDownloader
 from transformers import pipeline
 import tempfile
+import yt_dlp
 
 # --- Load NLP model once ---
 print("Loading sentiment analysis model...")
@@ -42,53 +42,54 @@ def clean_youtube_url(url):
 
 
 def scrape_comments(video_url, max_comments, fetch_all=False):
-    """Scrape YouTube comments using web scraping."""
-    import requests as req
-
+    """Scrape YouTube comments using yt-dlp."""
     video_url = clean_youtube_url(video_url)
     print(f"[scraper] Starting scrape for: {video_url}")
 
-    # Test connectivity first
+    limit = None if fetch_all else max_comments
+
+    ydl_opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "extract_flat": False,
+        "skip_download": True,
+        "getcomments": True,
+        "extractor_args": {
+            "youtube": {
+                "max_comments": [str(limit) if limit else "all"],
+                "comment_sort": ["top"],
+            }
+        },
+    }
+
     try:
-        r = req.get("https://www.youtube.com", timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        print(f"[scraper] YouTube reachable: HTTP {r.status_code}")
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            print("[scraper] Extracting info with yt-dlp...")
+            info = ydl.extract_info(video_url, download=False)
     except Exception as e:
-        print(f"[scraper] YouTube NOT reachable: {type(e).__name__}: {e}")
+        import traceback
+        print(f"[scraper] yt-dlp FAILED: {type(e).__name__}: {e}")
+        traceback.print_exc()
+        return pd.DataFrame()
 
-    downloader = YoutubeCommentDownloader()
+    raw_comments = info.get("comments") or []
+    print(f"[scraper] yt-dlp returned {len(raw_comments)} comments")
+
     comments_data = []
-    count = 0
-
-    # Try sort_by=0 (recent) first, then sort_by=1 (popular)
-    for sort in [0, 1]:
+    for c in raw_comments:
         try:
-            comments_data = []
-            count = 0
-            print(f"[scraper] Trying sort_by={sort}...")
-            gen = downloader.get_comments_from_url(video_url, sort_by=sort)
-            for comment in gen:
-                if not fetch_all and count >= max_comments:
-                    break
-                try:
-                    text = str(comment.get("text", "")).strip()
-                    if text:
-                        comments_data.append({
-                            "comment": text,
-                            "author": str(comment.get("author", "Unknown")),
-                            "date": str(comment.get("time", "N/A")),
-                            "likes": comment.get("votes", 0),
-                        })
-                        count += 1
-                except (UnicodeError, ValueError):
-                    continue
-            print(f"[scraper] sort_by={sort} got {len(comments_data)} comments")
-            if comments_data:
+            text = str(c.get("text", "")).strip()
+            if not text:
+                continue
+            comments_data.append({
+                "comment": text,
+                "author": str(c.get("author", "Unknown")),
+                "date": str(c.get("timestamp", "N/A")),
+                "likes": c.get("like_count", 0) or 0,
+            })
+            if not fetch_all and len(comments_data) >= max_comments:
                 break
-        except Exception as e:
-            import traceback
-            print(f"[scraper] sort_by={sort} FAILED: {type(e).__name__}: {e}")
-            traceback.print_exc()
-            comments_data = []
+        except (UnicodeError, ValueError):
             continue
 
     print(f"[scraper] Final result: {len(comments_data)} comments")
