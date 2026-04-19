@@ -58,6 +58,12 @@ def get_video_title(video_id, api_key):
     return "Unknown Video"
 
 
+def clean_html_entities(text):
+    """Clean HTML entities from YouTube API text."""
+    import html
+    return html.unescape(str(text)).strip()
+
+
 def scrape_comments(video_url, max_comments, fetch_all=False):
     """Fetch YouTube comments using YouTube Data API v3."""
     api_key = os.environ.get("YOUTUBE_API_KEY", "")
@@ -65,24 +71,34 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
         print("[scraper] ERROR: YOUTUBE_API_KEY not set")
         return pd.DataFrame(), "Unknown Video"
 
-    video_url = clean_youtube_url(video_url)
-    # Extract video ID
-    video_id = video_url.split("v=")[1] if "v=" in video_url else ""
-    print(f"[scraper] Starting scrape for video_id: {video_id}")
+    # Validate YouTube URL
+    if "youtube.com" not in video_url and "youtu.be" not in video_url:
+        print("[scraper] ERROR: Not a YouTube URL")
+        return pd.DataFrame(), "Invalid URL"
 
+    video_url = clean_youtube_url(video_url)
+    video_id = video_url.split("v=")[1] if "v=" in video_url else ""
+    if not video_id:
+        return pd.DataFrame(), "Invalid URL"
+
+    print(f"[scraper] Starting scrape for video_id: {video_id}")
     title = get_video_title(video_id, api_key)
     print(f"[scraper] Video title: {title}")
 
     comments_data = []
     next_page_token = None
-    limit = max_comments if not fetch_all else 999999
 
-    while len(comments_data) < limit:
+    while True:
+        # Stop if we've hit limit (unless fetch_all)
+        if not fetch_all and len(comments_data) >= max_comments:
+            break
+
+        batch_size = 100  # always fetch max 100 per page
         try:
             params = {
                 "part": "snippet",
                 "videoId": video_id,
-                "maxResults": min(100, limit - len(comments_data)),
+                "maxResults": batch_size,
                 "order": "relevance",
                 "key": api_key,
             }
@@ -97,7 +113,11 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
             data = r.json()
 
             if "error" in data:
-                print(f"[scraper] API error: {data['error']['message']}")
+                err = data["error"]
+                if err.get("code") == 403:
+                    print("[scraper] Quota exceeded or comments disabled")
+                else:
+                    print(f"[scraper] API error: {err.get('message', 'Unknown error')}")
                 break
 
             items = data.get("items", [])
@@ -106,9 +126,15 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
 
             for item in items:
                 snippet = item["snippet"]["topLevelComment"]["snippet"]
+                text = clean_html_entities(snippet.get("textDisplay", ""))
+                if not text:
+                    continue
+                # Trim to limit if not fetch_all
+                if not fetch_all and len(comments_data) >= max_comments:
+                    break
                 comments_data.append({
-                    "comment": str(snippet.get("textDisplay", "")).strip(),
-                    "author": str(snippet.get("authorDisplayName", "Unknown")),
+                    "comment": text,
+                    "author": clean_html_entities(snippet.get("authorDisplayName", "Unknown")),
                     "date": str(snippet.get("publishedAt", "N/A"))[:10],
                     "likes": snippet.get("likeCount", 0) or 0,
                 })
@@ -229,8 +255,8 @@ def create_wordcloud(df, sentiment, colormap):
     """Create word cloud for a specific sentiment with filtered words."""
     text = " ".join(df[df["sentiment"] == sentiment]["comment"].dropna().astype(str))
     if not text.strip():
-        fig, ax = plt.subplots(figsize=(8, 4), facecolor="#fff5f5")
-        ax.set_facecolor("#fff5f5")
+        fig, ax = plt.subplots(figsize=(8, 4), facecolor="#ffffff")
+        ax.set_facecolor("#ffffff")
         ax.text(0.5, 0.5, f"No {sentiment.lower()} comments", ha="center", va="center", fontsize=14, color="#8c5a5a")
         ax.axis("off")
         return fig
@@ -293,7 +319,7 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
         return f"Scraping failed: {type(e).__name__}: {e}", None, None, None, None, None, None
 
     if df.empty:
-        return f"No comments found. The video may have comments disabled or the URL is invalid.", None, None, None, None, None, None
+        return "No comments found. The video may have comments disabled, the URL is invalid, or the API quota is exceeded.", None, None, None, None, None, None
 
     # Step 2: Sentiment Analysis (batch processing — fast)
     progress(0.3, desc=f"Step 2/4: Analyzing sentiment of {len(df)} comments...")
@@ -320,13 +346,23 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 ### Top Positive Comments
 """
     top_pos = df[df["sentiment"] == "positive"].nlargest(3, "confidence")
-    for _, row in top_pos.iterrows():
-        summary += f"- **{row['author']}** ({row['confidence']}): {row['comment'][:100]}...\n"
+    if top_pos.empty:
+        summary += "_No positive comments found._\n"
+    else:
+        for _, row in top_pos.iterrows():
+            text = row['comment']
+            display = text[:100] + "..." if len(text) > 100 else text
+            summary += f"- **{row['author']}** ({row['confidence']}): {display}\n"
 
     summary += "\n### Top Negative Comments\n"
     top_neg = df[df["sentiment"] == "negative"].nlargest(3, "confidence")
-    for _, row in top_neg.iterrows():
-        summary += f"- **{row['author']}** ({row['confidence']}): {row['comment'][:100]}...\n"
+    if top_neg.empty:
+        summary += "_No negative comments found._\n"
+    else:
+        for _, row in top_neg.iterrows():
+            text = row['comment']
+            display = text[:100] + "..." if len(text) > 100 else text
+            summary += f"- **{row['author']}** ({row['confidence']}): {display}\n"
 
     # Step 4: Charts
     bar_chart = create_bar_chart(df)
@@ -630,7 +666,8 @@ with gr.Blocks(title="🍿 Brainrot Scanner", css=CSS, theme=gr.themes.Soft()) a
     def analyze_and_show(video_url, max_comments, fetch_all, progress=gr.Progress()):
         summary, bar, pie, wc_p, wc_n, display_df, csv = analyze_video(video_url, max_comments, fetch_all, progress)
         actual_count = len(display_df) if display_df is not None and hasattr(display_df, '__len__') else max_comments
-        new_slider = gr.update(value=actual_count, maximum=max(5000, actual_count))
+        new_max = max(5000, actual_count + 100)
+        new_slider = gr.update(value=actual_count, maximum=new_max)
         return gr.update(value=summary, visible=True), new_slider, bar, pie, wc_p, wc_n, display_df, csv
 
     analyze_btn.click(
