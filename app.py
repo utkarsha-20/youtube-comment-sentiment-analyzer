@@ -632,10 +632,12 @@ div[class*="file"] span, div[class*="file"] p,
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #f0c8c8; border-radius: 3px; }
 
-/* Hide HF popup */
+/* Hide HF UI elements */
 .gradio-container ~ div, div[data-testid="share-btn"],
 .share-button, .built-with, div.absolute.bottom-0,
-div.fixed.bottom-0, div[class*="space-info"] { display: none !important; }
+div.fixed.bottom-0, div[class*="space-info"],
+header, nav, .navbar, #header, .hf-header,
+div[class*="header"], footer, .footer { display: none !important; }
 
 /* Title area — no border, no card */
 .app-title { background: transparent !important; border: none !important; padding: 0 !important; }
