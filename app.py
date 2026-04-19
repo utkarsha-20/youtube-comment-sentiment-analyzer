@@ -179,7 +179,6 @@ PLOTLY_LAYOUT = dict(
     plot_bgcolor=CHART_BG,
     font=dict(color=CHART_FG, size=12),
     margin=dict(l=40, r=20, t=20, b=40),
-    showlegend=False,
 )
 
 
@@ -221,7 +220,7 @@ def create_pie_chart(df):
         textfont=dict(color=CHART_FG, size=12),
         hole=0.3,
     ))
-    fig.update_layout(**PLOTLY_LAYOUT, showlegend=True,
+    fig.update_layout(**PLOTLY_LAYOUT,
                       legend=dict(font=dict(color=CHART_FG)))
     return fig
 
