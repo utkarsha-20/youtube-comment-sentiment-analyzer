@@ -384,7 +384,7 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
         wc_neg = gr.Plot(label="Negative")
 
     gr.HTML('<div class="section-title">Comments</div>')
-    data_table = gr.Dataframe(label="All comments with sentiment", wrap=True, height=300)
+    data_table = gr.Dataframe(label="All comments with sentiment", wrap=True)
 
     csv_download = gr.File(label="Download CSV")
 

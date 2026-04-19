@@ -6,4 +6,3 @@ transformers
 torch
 matplotlib
 wordcloud
-gradio
