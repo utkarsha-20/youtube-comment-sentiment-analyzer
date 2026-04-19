@@ -343,7 +343,7 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 | Negative | {neg_count} ({round(neg_count/total*100, 1)}%) |
 | Avg Confidence | {avg_conf} |
 
-_Note: YouTube's API only returns top-level comments that pass its spam filter. Replies and spam-filtered comments are excluded, so the count may be lower than what you see on YouTube._
+_Note: YouTube's API only returns top-level comments that pass its spam filter (max ~10,000 per video). Replies and spam-filtered comments are excluded, so the count may be lower than what you see on YouTube._
 
 
 ### Top Positive Comments
@@ -657,13 +657,13 @@ with gr.Blocks(title="Brainrot Scanner", css=CSS, theme=gr.themes.Soft()) as dem
             </svg>
             <span style="font-size: 32px; font-weight: 700; color: #d42f3b; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">Brainrot Scanner 🍿</span>
         </div>
-        <p style="font-size: 14px; color: #9a5555; margin: 4px 0 0 42px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">We read ALL the YouTube comments so you don't have to ✨</p>
+        <p style="font-size: 14px; color: #9a5555; margin: 4px 0 0 42px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">We read ALL the YouTube comments so you don't have to ✨ — up to 10,000 per video</p>
     </div>
     """)
 
     with gr.Row():
         url_input = gr.Textbox(label="Video URL", placeholder="https://www.youtube.com/watch?v=...", lines=1, scale=3)
-        count_input = gr.Slider(minimum=50, maximum=5000, value=500, step=50, label="Number of comments to fetch", scale=1, info="Slide to choose how many comments to analyze")
+        count_input = gr.Slider(minimum=50, maximum=10000, value=500, step=50, label="Number of comments to fetch", scale=1, info="Slide to choose how many comments to analyze")
 
     with gr.Row():
         fetch_all_input = gr.Checkbox(label="Fetch all comments (ignores slider)", value=False)
