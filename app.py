@@ -17,7 +17,7 @@ import tempfile
 print("Loading sentiment analysis model...")
 sentiment_model = pipeline(
     "sentiment-analysis",
-    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    model="lxyuan/distilbert-base-multilingual-cased-sentiments-student",
     device=-1,
     truncation=True,
     max_length=512,
