@@ -6,3 +6,4 @@ transformers
 torch
 matplotlib
 wordcloud
+gradio>=5.23.0
