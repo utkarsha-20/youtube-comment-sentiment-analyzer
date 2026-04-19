@@ -504,14 +504,10 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
     csv_download = gr.File(label="Download CSV")
 
     def analyze_and_show(video_url, max_comments, fetch_all, progress=gr.Progress()):
-        result = analyze_video(video_url, max_comments, fetch_all, progress)
-        summary = result[0]
-        rest = result[1:]
-        # If fetch_all, update slider to show actual number of comments fetched
-        df = rest[4]  # data_table is index 4
-        actual_count = len(df) if df is not None and hasattr(df, '__len__') else max_comments
+        summary, bar, pie, wc_p, wc_n, display_df, csv = analyze_video(video_url, max_comments, fetch_all, progress)
+        actual_count = len(display_df) if display_df is not None and hasattr(display_df, '__len__') else max_comments
         new_slider = gr.update(value=actual_count, maximum=max(5000, actual_count))
-        return (gr.update(value=summary, visible=True), new_slider) + rest
+        return gr.update(value=summary, visible=True), new_slider, bar, pie, wc_p, wc_n, display_df, csv
 
     analyze_btn.click(
         fn=analyze_and_show,
