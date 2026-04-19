@@ -167,12 +167,12 @@ def analyze_sentiment(df):
     return df
 
 
-CHART_BG = "#fff5f5"
-CHART_FG = "#3d1212"
-CHART_GRID = "#f0d0d0"
+CHART_BG = "#fff0f0"
+CHART_FG = "#4a1a1a"
+CHART_GRID = "#f0c8c8"
 COLOR_POS = "#2e8b57"
-COLOR_NEG = "#cc2936"
-COLOR_NEU = "#999999"
+COLOR_NEG = "#d42f3b"
+COLOR_NEU = "#b0888a"
 
 PLOTLY_LAYOUT = dict(
     paper_bgcolor=CHART_BG,
@@ -265,7 +265,7 @@ def create_wordcloud(df, sentiment, colormap):
         stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
                            "waste", "poor", "ugly", "stupid", "awful", "annoying"})
 
-    wc_bg = "#fff5f5"
+    wc_bg = "#fff0f0"
     wc = WordCloud(width=800, height=400, background_color=wc_bg, colormap=colormap,
                    max_words=80, stopwords=stop_words).generate(text)
     fig, ax = plt.subplots(figsize=(8, 4), facecolor=wc_bg)
@@ -348,9 +348,42 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 
 
 CSS = """
-body, .gradio-container {
-    background: #fff5f5 !important;
-    color: #3d1212 !important;
+/* === NUKE ALL GRADIO DEFAULTS === */
+*, *::before, *::after {
+    --color-background-primary: #fff0f0 !important;
+    --color-background-secondary: #ffe8e8 !important;
+    --background-fill-primary: #ffffff !important;
+    --background-fill-secondary: #fff5f5 !important;
+    --block-background-fill: #ffffff !important;
+    --panel-background-fill: #fff0f0 !important;
+    --body-background-fill: #fff0f0 !important;
+    --color-accent: #d42f3b !important;
+    --color-accent-soft: #fce4e4 !important;
+    --block-border-color: #f0c8c8 !important;
+    --border-color-primary: #f0c8c8 !important;
+    --border-color-accent: #d42f3b !important;
+    --body-text-color: #4a1a1a !important;
+    --block-label-text-color: #4a1a1a !important;
+    --block-title-text-color: #4a1a1a !important;
+    --input-background-fill: #ffffff !important;
+    --input-border-color: #f0c8c8 !important;
+    --neutral-50: #fff5f5 !important;
+    --neutral-100: #ffe8e8 !important;
+    --neutral-200: #f0c8c8 !important;
+    --neutral-300: #e0a0a0 !important;
+    --neutral-400: #c07878 !important;
+    --neutral-500: #9a5555 !important;
+    --neutral-600: #7a3a3a !important;
+    --neutral-700: #5a2222 !important;
+    --neutral-800: #4a1a1a !important;
+    --neutral-900: #3a1010 !important;
+    --shadow-drop: none !important;
+    --shadow-drop-lg: none !important;
+}
+
+body, .gradio-container, .main, .wrap, .contain {
+    background: #fff0f0 !important;
+    color: #4a1a1a !important;
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif !important;
     font-size: 14px !important;
 }
@@ -360,25 +393,44 @@ body, .gradio-container {
     padding: 24px 20px !important;
 }
 
-/* Labels */
-label { color: #8c5a5a !important; font-size: 12px !important; font-weight: 500 !important; }
+/* Every panel, block, group, row */
+.gr-block, .gr-box, .gr-panel, .gr-group, .gr-row, .gr-column,
+div[class*="block"], div[class*="panel"], div[class*="wrap"],
+div[class*="container"], .block, .panel, .form {
+    background: transparent !important;
+    border-color: #f0c8c8 !important;
+}
+
+/* Labels — all of them */
+label, .gr-label, span.label-text, .label-wrap,
+div[data-testid] label, .gr-block label, .block label {
+    color: #7a3a3a !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    background: transparent !important;
+}
+
+/* Info text under slider */
+.info, span.info, .gr-info, div[class*="info"] span {
+    color: #9a5555 !important;
+}
 
 /* Inputs */
 input, textarea {
     background: #ffffff !important;
-    border: 1px solid #e8c4c4 !important;
+    border: 1px solid #f0c8c8 !important;
     border-radius: 6px !important;
-    color: #3d1212 !important;
+    color: #4a1a1a !important;
     font-size: 13px !important;
     padding: 8px 10px !important;
 }
-input:focus, textarea:focus { border-color: #cc2936 !important; outline: none !important; }
+input:focus, textarea:focus { border-color: #d42f3b !important; outline: none !important; }
 
 /* Button */
 .run-btn button {
-    background: #cc2936 !important;
+    background: #d42f3b !important;
     color: #ffffff !important;
-    border: 1px solid #cc2936 !important;
+    border: 1px solid #d42f3b !important;
     border-radius: 6px !important;
     padding: 8px 0 !important;
     font-size: 13px !important;
@@ -387,14 +439,14 @@ input:focus, textarea:focus { border-color: #cc2936 !important; outline: none !i
     cursor: pointer !important;
     transition: background 150ms ease !important;
 }
-.run-btn button:hover { background: #a82030 !important; border-color: #a82030 !important; }
+.run-btn button:hover { background: #b82530 !important; border-color: #b82530 !important; }
 
 /* Checkbox */
 input[type=checkbox] {
     appearance: none !important;
     width: 14px !important;
     height: 14px !important;
-    border: 1px solid #e8c4c4 !important;
+    border: 1px solid #f0c8c8 !important;
     border-radius: 3px !important;
     background: #ffffff !important;
     cursor: pointer !important;
@@ -402,8 +454,8 @@ input[type=checkbox] {
     transition: background 150ms ease, border-color 150ms ease !important;
 }
 input[type=checkbox]:checked {
-    background: #cc2936 !important;
-    border-color: #cc2936 !important;
+    background: #d42f3b !important;
+    border-color: #d42f3b !important;
 }
 input[type=checkbox]:checked::after {
     content: '' !important;
@@ -419,67 +471,82 @@ input[type=checkbox]:checked::after {
 }
 
 /* Slider */
-input[type=range] { accent-color: #cc2936 !important; }
+input[type=range] { accent-color: #d42f3b !important; }
 
 /* Plots */
-.gr-plot, .gr-plot > div, .js-plotly-plot, .plot-container, .plotly {
-    background: #fff5f5 !important;
+.gr-plot, .gr-plot > div, .js-plotly-plot, .plot-container, .plotly,
+div[class*="plot"], .svelte-plot, .plot-wrap {
+    background: #fff0f0 !important;
 }
 .gr-plot {
-    border: 1px solid #e8c4c4 !important;
+    border: 1px solid #f0c8c8 !important;
     border-radius: 6px !important;
     padding: 8px !important;
 }
 .gr-plot .modebar { background: transparent !important; }
 
+/* Plot labels */
+.gr-plot span, .plot-label {
+    color: #7a3a3a !important;
+    background: #fff0f0 !important;
+}
+
 /* Section title */
 .section-title {
     font-size: 12px;
-    color: #8c5a5a;
+    color: #7a3a3a;
     font-weight: 500;
     padding: 16px 0 6px 0;
-    border-bottom: 1px solid #e8c4c4;
+    border-bottom: 1px solid #f0c8c8;
     margin-bottom: 8px;
 }
 
 /* Summary markdown */
-.gr-markdown {
+.gr-markdown, .markdown-text, div[class*="markdown"] {
     background: #ffffff !important;
-    border: 1px solid #e8c4c4 !important;
+    border: 1px solid #f0c8c8 !important;
     border-radius: 6px !important;
     padding: 14px 16px !important;
     font-size: 13px !important;
+    color: #4a1a1a !important;
 }
-.gr-markdown h2 { font-size: 14px !important; color: #3d1212 !important; font-weight: 600 !important; margin-bottom: 8px !important; border: none !important; }
-.gr-markdown h3 { font-size: 12px !important; color: #8c5a5a !important; font-weight: 500 !important; margin: 12px 0 4px !important; }
-.gr-markdown table { font-size: 12px !important; }
-.gr-markdown th { color: #8c5a5a !important; font-weight: 500 !important; padding: 4px 8px !important; border-bottom: 1px solid #e8c4c4 !important; text-align: left !important; }
-.gr-markdown td { color: #3d1212 !important; padding: 4px 8px !important; border-bottom: 1px solid #e8c4c4 !important; }
+.gr-markdown h2, div[class*="markdown"] h2 { font-size: 14px !important; color: #4a1a1a !important; font-weight: 600 !important; margin-bottom: 8px !important; border: none !important; }
+.gr-markdown h3, div[class*="markdown"] h3 { font-size: 12px !important; color: #7a3a3a !important; font-weight: 500 !important; margin: 12px 0 4px !important; }
+.gr-markdown table, div[class*="markdown"] table { font-size: 12px !important; }
+.gr-markdown th, div[class*="markdown"] th { color: #7a3a3a !important; font-weight: 500 !important; padding: 4px 8px !important; border-bottom: 1px solid #f0c8c8 !important; text-align: left !important; }
+.gr-markdown td, div[class*="markdown"] td { color: #4a1a1a !important; padding: 4px 8px !important; border-bottom: 1px solid #f0c8c8 !important; }
+.gr-markdown p, div[class*="markdown"] p { color: #4a1a1a !important; }
 
 /* Dataframe */
-.gr-dataframe { background: #ffffff !important; border: 1px solid #e8c4c4 !important; border-radius: 6px !important; }
-.gr-dataframe th { background: #fff0f0 !important; color: #8c5a5a !important; font-size: 11px !important; padding: 6px 8px !important; border-bottom: 1px solid #e8c4c4 !important; }
-.gr-dataframe td { color: #3d1212 !important; font-size: 12px !important; padding: 5px 8px !important; border-bottom: 1px solid #f0d0d0 !important; }
+.gr-dataframe, table, div[class*="table"] { background: #ffffff !important; border: 1px solid #f0c8c8 !important; border-radius: 6px !important; }
+.gr-dataframe th, div[class*="table"] th { background: #fff5f5 !important; color: #7a3a3a !important; font-size: 11px !important; padding: 6px 8px !important; border-bottom: 1px solid #f0c8c8 !important; }
+.gr-dataframe td, div[class*="table"] td { color: #4a1a1a !important; font-size: 12px !important; padding: 5px 8px !important; border-bottom: 1px solid #fce4e4 !important; }
 
 /* File */
-.gr-file { background: #ffffff !important; border: 1px solid #e8c4c4 !important; border-radius: 6px !important; }
+.gr-file, div[class*="file"] { background: #ffffff !important; border: 1px solid #f0c8c8 !important; border-radius: 6px !important; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e8c4c4; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #f0c8c8; border-radius: 3px; }
 
 /* Hide HF popup */
 .gradio-container ~ div, div[data-testid="share-btn"],
 .share-button, .built-with, div.absolute.bottom-0,
 div.fixed.bottom-0, div[class*="space-info"] { display: none !important; }
+
+/* Title area — no border, no card */
+.app-title { background: transparent !important; border: none !important; padding: 0 !important; }
+.app-title h2 { font-size: 20px !important; color: #d42f3b !important; font-weight: 600 !important; }
+.app-subtitle { background: transparent !important; border: none !important; padding: 0 0 12px 0 !important; }
+.app-subtitle p { font-size: 13px !important; color: #9a5555 !important; }
 """
 
 # --- Gradio UI ---
 with gr.Blocks(title="🍿 Brainrot Scanner", css=CSS, theme=gr.themes.Soft()) as demo:
 
-    gr.Markdown("## 🍿 Brainrot Scanner")
-    gr.Markdown("We read ALL the YouTube comments so you don't have to ✨")
+    gr.Markdown("## 🍿 Brainrot Scanner", elem_classes="app-title")
+    gr.Markdown("We read ALL the YouTube comments so you don't have to ✨", elem_classes="app-subtitle")
 
     with gr.Row():
         url_input = gr.Textbox(label="Video URL", placeholder="https://www.youtube.com/watch?v=...", lines=1, scale=3)
