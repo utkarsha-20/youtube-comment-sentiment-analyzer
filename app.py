@@ -421,10 +421,10 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
 
     with gr.Row():
         url_input = gr.Textbox(label="Video URL", placeholder="https://www.youtube.com/watch?v=...", lines=1, scale=3)
-        count_input = gr.Slider(minimum=50, maximum=5000, value=500, step=50, label="Comments", scale=1)
+        count_input = gr.Slider(minimum=50, maximum=5000, value=500, step=50, label="Number of comments to fetch", scale=1, info="Slide to choose how many comments to analyze")
 
     with gr.Row():
-        fetch_all_input = gr.Checkbox(label="Fetch all comments", value=False)
+        fetch_all_input = gr.Checkbox(label="Fetch all comments (ignores slider)", value=False)
 
     with gr.Row(elem_classes="run-btn"):
         analyze_btn = gr.Button("Analyze", variant="secondary")
