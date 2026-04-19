@@ -49,10 +49,12 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     count = 0
 
     # Try sort_by=0 (recent) first, then sort_by=1 (popular)
+    print(f"[scraper] Starting scrape for: {video_url}")
     for sort in [0, 1]:
         try:
             comments_data = []
             count = 0
+            print(f"[scraper] Trying sort_by={sort}...")
             for comment in downloader.get_comments_from_url(video_url, sort_by=sort):
                 if not fetch_all and count >= max_comments:
                     break
@@ -68,11 +70,14 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
                         count += 1
                 except (UnicodeError, ValueError):
                     continue
+            print(f"[scraper] sort_by={sort} got {len(comments_data)} comments")
             if comments_data:
                 break
-        except Exception:
+        except Exception as e:
+            print(f"[scraper] sort_by={sort} FAILED: {type(e).__name__}: {e}")
             comments_data = []
             continue
+    print(f"[scraper] Final result: {len(comments_data)} comments")
 
     return pd.DataFrame(comments_data)
 
@@ -205,10 +210,12 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     try:
         df = scrape_comments(video_url.strip(), max_comments, fetch_all)
     except Exception as e:
-        return f"Scraping failed: {e}", None, None, None, None, None, None
+        import traceback
+        traceback.print_exc()
+        return f"Scraping failed: {type(e).__name__}: {e}", None, None, None, None, None, None
 
     if df.empty:
-        return "No comments found. Check the URL and try again.", None, None, None, None, None, None
+        return f"No comments found for URL: {clean_youtube_url(video_url.strip())} — the video may have comments disabled or YouTube is blocking this server.", None, None, None, None, None, None
 
     # Step 2: Sentiment Analysis (batch processing — fast)
     progress(0.3, desc=f"Step 2/4: Analyzing sentiment of {len(df)} comments...")
