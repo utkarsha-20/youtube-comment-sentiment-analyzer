@@ -64,41 +64,28 @@ def clean_html_entities(text):
     return html.unescape(str(text)).strip()
 
 
-def scrape_comments(video_url, max_comments, fetch_all=False):
-    """Fetch YouTube comments using YouTube Data API v3."""
-    api_key = os.environ.get("YOUTUBE_API_KEY", "")
-    if not api_key:
-        print("[scraper] ERROR: YOUTUBE_API_KEY not set")
-        return pd.DataFrame(), "Unknown Video"
-
-    # Validate YouTube URL
-    if "youtube.com" not in video_url and "youtu.be" not in video_url:
-        print("[scraper] ERROR: Not a YouTube URL")
-        return pd.DataFrame(), "Invalid URL"
-
+def scrape_comments_api(video_url, max_comments, fetch_all, api_key):
+    """Fetch comments using YouTube Data API v3 (used on HF Spaces)."""
     video_url = clean_youtube_url(video_url)
     video_id = video_url.split("v=")[1] if "v=" in video_url else ""
     if not video_id:
         return pd.DataFrame(), "Invalid URL"
 
-    print(f"[scraper] Starting scrape for video_id: {video_id}")
+    print(f"[API] Starting scrape for video_id: {video_id}")
     title = get_video_title(video_id, api_key)
-    print(f"[scraper] Video title: {title}")
+    print(f"[API] Video title: {title}")
 
     comments_data = []
     next_page_token = None
 
     while True:
-        # Stop if we've hit limit (unless fetch_all)
         if not fetch_all and len(comments_data) >= max_comments:
             break
-
-        batch_size = 100  # always fetch max 100 per page
         try:
             params = {
                 "part": "snippet",
                 "videoId": video_id,
-                "maxResults": batch_size,
+                "maxResults": 100,
                 "order": "relevance",
                 "key": api_key,
             }
@@ -115,9 +102,9 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
             if "error" in data:
                 err = data["error"]
                 if err.get("code") == 403:
-                    print("[scraper] Quota exceeded or comments disabled")
+                    print("[API] Quota exceeded or comments disabled")
                 else:
-                    print(f"[scraper] API error: {err.get('message', 'Unknown error')}")
+                    print(f"[API] Error: {err.get('message', 'Unknown error')}")
                 break
 
             items = data.get("items", [])
@@ -129,7 +116,6 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
                 text = clean_html_entities(snippet.get("textDisplay", ""))
                 if not text:
                     continue
-                # Trim to limit if not fetch_all
                 if not fetch_all and len(comments_data) >= max_comments:
                     break
                 comments_data.append({
@@ -140,19 +126,87 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
                 })
 
             next_page_token = data.get("nextPageToken")
-            print(f"[scraper] Fetched {len(comments_data)} comments so far...")
-
+            print(f"[API] Fetched {len(comments_data)} comments so far...")
             if not next_page_token:
                 break
 
         except Exception as e:
             import traceback
-            print(f"[scraper] FAILED: {type(e).__name__}: {e}")
+            print(f"[API] FAILED: {type(e).__name__}: {e}")
             traceback.print_exc()
             break
 
+    print(f"[API] Final result: {len(comments_data)} comments")
+    return pd.DataFrame(comments_data), title
+
+
+def scrape_comments_local(video_url, max_comments, fetch_all):
+    """Scrape comments using youtube-comment-downloader (used locally)."""
+    from youtube_comment_downloader import YoutubeCommentDownloader
+
+    video_url = clean_youtube_url(video_url)
+    print(f"[scraper] Starting local scrape for: {video_url}")
+
+    # Try to get title via requests
+    title = "Unknown Video"
+    try:
+        r = requests.get(video_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        import re
+        match = re.search(r'<title>(.*?) - YouTube</title>', r.text)
+        if match:
+            title = match.group(1)
+    except Exception:
+        pass
+
+    downloader = YoutubeCommentDownloader()
+    comments_data = []
+    count = 0
+
+    for sort in [0, 1]:
+        try:
+            comments_data = []
+            count = 0
+            print(f"[scraper] Trying sort_by={sort}...")
+            for comment in downloader.get_comments_from_url(video_url, sort_by=sort):
+                if not fetch_all and count >= max_comments:
+                    break
+                try:
+                    text = str(comment.get("text", "")).strip()
+                    if text:
+                        comments_data.append({
+                            "comment": text,
+                            "author": str(comment.get("author", "Unknown")),
+                            "date": str(comment.get("time", "N/A")),
+                            "likes": comment.get("votes", 0) or 0,
+                        })
+                        count += 1
+                except (UnicodeError, ValueError):
+                    continue
+            print(f"[scraper] sort_by={sort} got {len(comments_data)} comments")
+            if comments_data:
+                break
+        except Exception as e:
+            print(f"[scraper] sort_by={sort} FAILED: {type(e).__name__}: {e}")
+            comments_data = []
+            continue
+
     print(f"[scraper] Final result: {len(comments_data)} comments")
     return pd.DataFrame(comments_data), title
+
+
+def scrape_comments(video_url, max_comments, fetch_all=False):
+    """Auto-detect: use API on HF Spaces, scraping locally."""
+    # Validate URL first
+    if "youtube.com" not in video_url and "youtu.be" not in video_url:
+        return pd.DataFrame(), "Invalid URL"
+
+    api_key = os.environ.get("YOUTUBE_API_KEY", "")
+    if api_key:
+        print("[mode] Using YouTube Data API v3")
+        return scrape_comments_api(video_url, max_comments, fetch_all, api_key)
+    else:
+        print("[mode] Using local web scraping")
+        return scrape_comments_local(video_url, max_comments, fetch_all)
 
 
 CONFIDENCE_THRESHOLD = 0.85
