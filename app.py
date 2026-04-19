@@ -476,7 +476,7 @@ div.fixed.bottom-0, div[class*="space-info"] { display: none !important; }
 """
 
 # --- Gradio UI ---
-with gr.Blocks(title="🍿 Brainrot Scanner", css=CSS) as demo:
+with gr.Blocks(title="🍿 Brainrot Scanner", css=CSS, theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("## 🍿 Brainrot Scanner")
     gr.Markdown("We read ALL the YouTube comments so you don't have to ✨")
