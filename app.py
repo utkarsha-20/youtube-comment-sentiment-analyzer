@@ -167,12 +167,12 @@ def analyze_sentiment(df):
     return df
 
 
-CHART_BG = "#fff0f0"
+CHART_BG = "#ffffff"
 CHART_FG = "#4a1a1a"
 CHART_GRID = "#f0c8c8"
 COLOR_POS = "#2e8b57"
 COLOR_NEG = "#d42f3b"
-COLOR_NEU = "#b0888a"
+COLOR_NEU = "#c4a0a2"
 
 PLOTLY_LAYOUT = dict(
     paper_bgcolor=CHART_BG,
@@ -265,7 +265,7 @@ def create_wordcloud(df, sentiment, colormap):
         stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
                            "waste", "poor", "ugly", "stupid", "awful", "annoying"})
 
-    wc_bg = "#fff0f0"
+    wc_bg = "#ffffff"
     wc = WordCloud(width=800, height=400, background_color=wc_bg, colormap=colormap,
                    max_words=80, stopwords=stop_words).generate(text)
     fig, ax = plt.subplots(figsize=(8, 4), facecolor=wc_bg)
@@ -476,7 +476,7 @@ input[type=range] { accent-color: #d42f3b !important; }
 /* Plots */
 .gr-plot, .gr-plot > div, .js-plotly-plot, .plot-container, .plotly,
 div[class*="plot"], .svelte-plot, .plot-wrap {
-    background: #fff0f0 !important;
+    background: #ffffff !important;
 }
 .gr-plot {
     border: 1px solid #f0c8c8 !important;
@@ -488,7 +488,7 @@ div[class*="plot"], .svelte-plot, .plot-wrap {
 /* Plot labels */
 .gr-plot span, .plot-label {
     color: #7a3a3a !important;
-    background: #fff0f0 !important;
+    background: #ffffff !important;
 }
 
 /* Section title */
