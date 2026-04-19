@@ -377,54 +377,33 @@ input:focus, textarea:focus { border-color: #4a4a4a !important; outline: none !i
 }
 .run-btn button:hover { border-color: #3fb950 !important; color: #3fb950 !important; }
 
-/* Hide default checkbox — replaced by custom toggle */
-.fetch-all-row { display: none !important; }
-
-/* Custom toggle */
-.custom-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 0;
-    cursor: pointer;
-    width: fit-content;
-    user-select: none;
+/* Checkbox */
+input[type=checkbox] {
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border: 1px solid #3a3a3a !important;
+    border-radius: 3px !important;
+    background: #1e1e1e !important;
+    cursor: pointer !important;
+    position: relative !important;
+    transition: background 150ms ease, border-color 150ms ease !important;
 }
-.toggle-track {
-    width: 36px;
-    height: 20px;
-    background: #2e2e2e;
-    border: 1px solid #3a3a3a;
-    border-radius: 4px;
-    position: relative;
-    transition: background 150ms ease, border-color 150ms ease;
-    flex-shrink: 0;
+input[type=checkbox]:checked {
+    background: #3fb950 !important;
+    border-color: #3fb950 !important;
 }
-.toggle-track.on {
-    background: #1a2e1a;
-    border-color: #3fb950;
-}
-.toggle-knob {
-    width: 12px;
-    height: 12px;
-    background: #555;
-    border-radius: 2px;
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    transition: left 150ms ease, background 150ms ease;
-}
-.toggle-track.on .toggle-knob {
-    left: 19px;
-    background: #3fb950;
-}
-.toggle-label {
-    font-size: 12px;
-    color: #888;
-    font-weight: 500;
-}
-.toggle-track.on + .toggle-label {
-    color: #c9c9c9;
+input[type=checkbox]:checked::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 4px !important;
+    top: 1px !important;
+    width: 4px !important;
+    height: 8px !important;
+    border: 2px solid #121212 !important;
+    border-top: none !important;
+    border-left: none !important;
+    transform: rotate(45deg) !important;
 }
 
 /* Slider */
@@ -490,24 +469,8 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
         url_input = gr.Textbox(label="Video URL", placeholder="https://www.youtube.com/watch?v=...", lines=1, scale=3)
         count_input = gr.Slider(minimum=50, maximum=5000, value=500, step=50, label="Number of comments to fetch", scale=1, info="Slide to choose how many comments to analyze")
 
-    with gr.Row(elem_classes="fetch-all-row"):
-        fetch_all_input = gr.Checkbox(label="Fetch all comments (ignores slider)", value=False, elem_id="fetch-all-checkbox")
-
-    gr.HTML("""
-    <div class="custom-toggle" id="toggle-wrap" onclick="
-        var track = document.getElementById('toggle-track');
-        var cb = document.querySelector('#fetch-all-checkbox input[type=checkbox]');
-        var label = document.getElementById('toggle-label-text');
-        var isOn = track.classList.toggle('on');
-        if (cb) cb.click();
-        label.textContent = isOn ? 'Fetch all comments' : 'Fetch all comments';
-    ">
-        <div class="toggle-track" id="toggle-track">
-            <div class="toggle-knob"></div>
-        </div>
-        <span class="toggle-label" id="toggle-label-text">Fetch all comments</span>
-    </div>
-    """)
+    with gr.Row():
+        fetch_all_input = gr.Checkbox(label="Fetch all comments (ignores slider)", value=False)
 
     with gr.Row(elem_classes="run-btn"):
         analyze_btn = gr.Button("Analyze", variant="secondary")
