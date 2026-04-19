@@ -450,12 +450,16 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
         result = analyze_video(video_url, max_comments, fetch_all, progress)
         summary = result[0]
         rest = result[1:]
-        return (gr.update(value=summary, visible=True),) + rest
+        # If fetch_all, update slider to show actual number of comments fetched
+        df = rest[4]  # data_table is index 4
+        actual_count = len(df) if df is not None and hasattr(df, '__len__') else max_comments
+        new_slider = gr.update(value=actual_count, maximum=max(5000, actual_count))
+        return (gr.update(value=summary, visible=True), new_slider) + rest
 
     analyze_btn.click(
         fn=analyze_and_show,
         inputs=[url_input, count_input, fetch_all_input],
-        outputs=[summary_output, bar_chart, pie_chart, wc_pos, wc_neg, data_table, csv_download],
+        outputs=[summary_output, count_input, bar_chart, pie_chart, wc_pos, wc_neg, data_table, csv_download],
     )
 
 demo.launch()
