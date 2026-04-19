@@ -401,13 +401,37 @@ div[class*="container"], .block, .panel, .form {
     border-color: #f0c8c8 !important;
 }
 
-/* Labels — all of them */
+/* Labels — all of them, no blue backgrounds */
 label, .gr-label, span.label-text, .label-wrap,
-div[data-testid] label, .gr-block label, .block label {
-    color: #7a3a3a !important;
+div[data-testid] label, .gr-block label, .block label,
+span[data-testid="block-label"], .block-label, .label-text {
+    color: #4a1a1a !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Block label headers (the blue pill things) */
+.block-label, div[class*="block-label"], span[class*="label"],
+.svelte-1gfkn6j, [data-testid="block-label"] {
+    background: transparent !important;
+    color: #4a1a1a !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    padding: 0 !important;
+}
+
+/* Slider reset button — terracotta */
+button[aria-label="Reset"], .reset-button, button.reset,
+span[class*="reset"] button, div[class*="number"] button {
+    background: #c0634a !important;
+    color: #ffffff !important;
+    border: 1px solid #c0634a !important;
+    border-radius: 6px !important;
 }
 
 /* Info text under slider */
