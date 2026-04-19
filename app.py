@@ -426,7 +426,16 @@ input, textarea {
 }
 input:focus, textarea:focus { border-color: #d42f3b !important; outline: none !important; }
 
-/* Button */
+/* Kill all blue from Gradio Soft theme — terracotta */
+button, .btn, [class*="btn"], [class*="button"] {
+    background: #c0634a !important;
+    color: #ffffff !important;
+    border: 1px solid #c0634a !important;
+    border-radius: 6px !important;
+}
+button:hover, .btn:hover { background: #a8523b !important; border-color: #a8523b !important; }
+
+/* Analyze button */
 .run-btn button {
     background: #d42f3b !important;
     color: #ffffff !important;
@@ -439,7 +448,7 @@ input:focus, textarea:focus { border-color: #d42f3b !important; outline: none !i
     cursor: pointer !important;
     transition: background 150ms ease !important;
 }
-.run-btn button:hover { background: #b82530 !important; border-color: #b82530 !important; }
+.run-btn button:hover { background: #b82530 !important; border-color: #b82530 !important; color: #ffffff !important; }
 
 /* Checkbox */
 input[type=checkbox] {
@@ -517,10 +526,29 @@ div[class*="plot"], .svelte-plot, .plot-wrap {
 .gr-markdown td, div[class*="markdown"] td { color: #4a1a1a !important; padding: 4px 8px !important; border-bottom: 1px solid #f0c8c8 !important; }
 .gr-markdown p, div[class*="markdown"] p { color: #4a1a1a !important; }
 
-/* Dataframe */
-.gr-dataframe, table, div[class*="table"] { background: #ffffff !important; border: 1px solid #f0c8c8 !important; border-radius: 6px !important; }
-.gr-dataframe th, div[class*="table"] th { background: #fff5f5 !important; color: #7a3a3a !important; font-size: 11px !important; padding: 6px 8px !important; border-bottom: 1px solid #f0c8c8 !important; }
-.gr-dataframe td, div[class*="table"] td { color: #4a1a1a !important; font-size: 12px !important; padding: 5px 8px !important; border-bottom: 1px solid #fce4e4 !important; }
+/* Dataframe / Comments section — white background */
+.gr-dataframe, table, div[class*="table"],
+div[class*="dataframe"], div[class*="dataset"] {
+    background: #ffffff !important;
+    border: 1px solid #f0c8c8 !important;
+    border-radius: 6px !important;
+}
+.gr-dataframe th, div[class*="table"] th,
+div[class*="dataframe"] th {
+    background: #fff5f5 !important;
+    color: #7a3a3a !important;
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    border-bottom: 1px solid #f0c8c8 !important;
+}
+.gr-dataframe td, div[class*="table"] td,
+div[class*="dataframe"] td {
+    background: #ffffff !important;
+    color: #4a1a1a !important;
+    font-size: 12px !important;
+    padding: 5px 8px !important;
+    border-bottom: 1px solid #fce4e4 !important;
+}
 
 /* File */
 .gr-file, div[class*="file"] { background: #ffffff !important; border: 1px solid #f0c8c8 !important; border-radius: 6px !important; }
