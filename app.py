@@ -43,19 +43,30 @@ def clean_youtube_url(url):
 
 def scrape_comments(video_url, max_comments, fetch_all=False):
     """Scrape YouTube comments using web scraping."""
+    import requests as req
+
     video_url = clean_youtube_url(video_url)
+    print(f"[scraper] Starting scrape for: {video_url}")
+
+    # Test connectivity first
+    try:
+        r = req.get("https://www.youtube.com", timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        print(f"[scraper] YouTube reachable: HTTP {r.status_code}")
+    except Exception as e:
+        print(f"[scraper] YouTube NOT reachable: {type(e).__name__}: {e}")
+
     downloader = YoutubeCommentDownloader()
     comments_data = []
     count = 0
 
     # Try sort_by=0 (recent) first, then sort_by=1 (popular)
-    print(f"[scraper] Starting scrape for: {video_url}")
     for sort in [0, 1]:
         try:
             comments_data = []
             count = 0
             print(f"[scraper] Trying sort_by={sort}...")
-            for comment in downloader.get_comments_from_url(video_url, sort_by=sort):
+            gen = downloader.get_comments_from_url(video_url, sort_by=sort)
+            for comment in gen:
                 if not fetch_all and count >= max_comments:
                     break
                 try:
@@ -74,11 +85,13 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
             if comments_data:
                 break
         except Exception as e:
+            import traceback
             print(f"[scraper] sort_by={sort} FAILED: {type(e).__name__}: {e}")
+            traceback.print_exc()
             comments_data = []
             continue
-    print(f"[scraper] Final result: {len(comments_data)} comments")
 
+    print(f"[scraper] Final result: {len(comments_data)} comments")
     return pd.DataFrame(comments_data)
 
 
