@@ -49,26 +49,11 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     count = 0
 
     # Try sort_by=1 (popular) first, then sort_by=0 (recent)
-    # The error happens inside the generator, so we catch it during iteration
     for sort in [1, 0]:
         try:
-            comments = downloader.get_comments_from_url(video_url, sort_by=sort)
-            # Force the first item to trigger any sorting error early
-            first = next(comments, None)
-            if first is None:
-                continue
-            # First item worked — process it
-            text = first.get("text", "").strip()
-            if text:
-                comments_data.append({
-                    "comment": text,
-                    "author": first.get("author", "Unknown"),
-                    "date": first.get("time", "N/A"),
-                    "likes": first.get("votes", 0),
-                })
-                count += 1
-            # Continue with rest of comments
-            for comment in comments:
+            comments_data = []
+            count = 0
+            for comment in downloader.get_comments_from_url(video_url, sort_by=sort):
                 if not fetch_all and count >= max_comments:
                     break
                 text = comment.get("text", "").strip()
@@ -80,10 +65,11 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
                         "likes": comment.get("votes", 0),
                     })
                     count += 1
-            break  # Success, stop trying other sort options
-        except (RuntimeError, StopIteration):
+            if comments_data:
+                break
+        except Exception as e:
+            print(f"sort_by={sort} failed: {e}")
             comments_data = []
-            count = 0
             continue
 
     return pd.DataFrame(comments_data)
