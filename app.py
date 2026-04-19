@@ -589,9 +589,9 @@ div.fixed.bottom-0, div[class*="space-info"] { display: none !important; }
 
 /* Title area — no border, no card */
 .app-title { background: transparent !important; border: none !important; padding: 0 !important; }
-.app-title h2 { font-size: 20px !important; color: #d42f3b !important; font-weight: 600 !important; }
+.app-title h2 { font-size: 32px !important; color: #d42f3b !important; font-weight: 700 !important; }
 .app-subtitle { background: transparent !important; border: none !important; padding: 0 0 12px 0 !important; }
-.app-subtitle p { font-size: 13px !important; color: #9a5555 !important; }
+.app-subtitle p { font-size: 14px !important; color: #9a5555 !important; }
 """
 
 # --- Gradio UI ---
