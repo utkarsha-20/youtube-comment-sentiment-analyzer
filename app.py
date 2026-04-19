@@ -16,7 +16,7 @@ import tempfile
 print("Loading sentiment analysis model...")
 sentiment_model = pipeline(
     "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english",
+    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
     device=-1,
     truncation=True,
     max_length=512,
@@ -94,11 +94,12 @@ CHART_FG = "#c9d1d9"
 CHART_GRID = "#21262d"
 COLOR_POS = "#3fb950"
 COLOR_NEG = "#f78166"
+COLOR_NEU = "#8b949e"
 
 def create_bar_chart(df):
     """Create sentiment distribution bar chart."""
     counts = df["sentiment"].value_counts()
-    colors = {"POSITIVE": COLOR_POS, "NEGATIVE": COLOR_NEG}
+    colors = {"positive": COLOR_POS, "negative": COLOR_NEG, "neutral": COLOR_NEU}
     bar_colors = [colors.get(l, "#8b949e") for l in counts.index]
 
     fig, ax = plt.subplots(figsize=(6, 4), facecolor=CHART_BG)
@@ -119,7 +120,7 @@ def create_bar_chart(df):
 def create_pie_chart(df):
     """Create sentiment pie chart."""
     counts = df["sentiment"].value_counts()
-    colors = {"POSITIVE": COLOR_POS, "NEGATIVE": COLOR_NEG}
+    colors = {"positive": COLOR_POS, "negative": COLOR_NEG, "neutral": COLOR_NEU}
     pie_colors = [colors.get(l, "#8b949e") for l in counts.index]
 
     fig, ax = plt.subplots(figsize=(5, 5), facecolor=CHART_BG)
@@ -167,12 +168,12 @@ def create_wordcloud(df, sentiment, colormap):
     }
 
     # Add opposite-sentiment words to stop list
-    if sentiment == "NEGATIVE":
+    if sentiment == "negative":
         stop_words.update({"love", "great", "good", "best", "amazing", "awesome",
                            "beautiful", "perfect", "excellent", "wonderful", "fantastic",
                            "cool", "nice", "hope", "happy", "gracias", "hermosos",
-                           "grande", "indah", "love"})
-    else:
+                           "grande", "indah"})
+    elif sentiment == "positive":
         stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
                            "waste", "poor", "ugly", "stupid", "awful", "annoying"})
 
@@ -210,8 +211,9 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     # Step 3: Summary
     progress(0.7, desc="Step 3/4: Generating charts and word clouds...")
     total = len(df)
-    pos_count = len(df[df["sentiment"] == "POSITIVE"])
-    neg_count = len(df[df["sentiment"] == "NEGATIVE"])
+    pos_count = len(df[df["sentiment"] == "positive"])
+    neg_count = len(df[df["sentiment"] == "negative"])
+    neu_count = len(df[df["sentiment"] == "neutral"])
     avg_conf = round(df["confidence"].mean(), 3)
 
     summary = f"""## Results
@@ -220,25 +222,26 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 |--------|-------|
 | Total Comments Analyzed | {total} |
 | Positive | {pos_count} ({round(pos_count/total*100, 1)}%) |
+| Neutral | {neu_count} ({round(neu_count/total*100, 1)}%) |
 | Negative | {neg_count} ({round(neg_count/total*100, 1)}%) |
 | Avg Confidence | {avg_conf} |
 
 ### Top Positive Comments
 """
-    top_pos = df[df["sentiment"] == "POSITIVE"].nlargest(3, "confidence")
+    top_pos = df[df["sentiment"] == "positive"].nlargest(3, "confidence")
     for _, row in top_pos.iterrows():
         summary += f"- **{row['author']}** ({row['confidence']}): {row['comment'][:100]}...\n"
 
     summary += "\n### Top Negative Comments\n"
-    top_neg = df[df["sentiment"] == "NEGATIVE"].nlargest(3, "confidence")
+    top_neg = df[df["sentiment"] == "negative"].nlargest(3, "confidence")
     for _, row in top_neg.iterrows():
         summary += f"- **{row['author']}** ({row['confidence']}): {row['comment'][:100]}...\n"
 
     # Step 4: Charts
     bar_chart = create_bar_chart(df)
     pie_chart = create_pie_chart(df)
-    wc_positive = create_wordcloud(df, "POSITIVE", "Greens")
-    wc_negative = create_wordcloud(df, "NEGATIVE", "Reds")
+    wc_positive = create_wordcloud(df, "positive", "Greens")
+    wc_negative = create_wordcloud(df, "negative", "Reds")
 
     # Step 5: Data table
     display_df = df[["comment", "author", "date", "likes", "sentiment", "confidence"]]
