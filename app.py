@@ -58,7 +58,11 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
             "youtube": {
                 "max_comments": [str(limit) if limit else "all"],
                 "comment_sort": ["top"],
+                "player_client": ["android", "web"],
             }
+        },
+        "http_headers": {
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36",
         },
     }
 
