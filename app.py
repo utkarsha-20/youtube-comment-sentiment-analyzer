@@ -167,12 +167,12 @@ def analyze_sentiment(df):
     return df
 
 
-CHART_BG = "#1e1e1e"
-CHART_FG = "#c9c9c9"
-CHART_GRID = "#2e2e2e"
-COLOR_POS = "#3fb950"
-COLOR_NEG = "#e05c4b"
-COLOR_NEU = "#666666"
+CHART_BG = "#fff5f5"
+CHART_FG = "#3d1212"
+CHART_GRID = "#f0d0d0"
+COLOR_POS = "#2e8b57"
+COLOR_NEG = "#cc2936"
+COLOR_NEU = "#999999"
 
 PLOTLY_LAYOUT = dict(
     paper_bgcolor=CHART_BG,
@@ -264,10 +264,11 @@ def create_wordcloud(df, sentiment, colormap):
         stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
                            "waste", "poor", "ugly", "stupid", "awful", "annoying"})
 
-    wc = WordCloud(width=800, height=400, background_color=CHART_BG, colormap=colormap,
+    wc_bg = "#fff5f5"
+    wc = WordCloud(width=800, height=400, background_color=wc_bg, colormap=colormap,
                    max_words=80, stopwords=stop_words).generate(text)
-    fig, ax = plt.subplots(figsize=(8, 4), facecolor=CHART_BG)
-    ax.set_facecolor(CHART_BG)
+    fig, ax = plt.subplots(figsize=(8, 4), facecolor=wc_bg)
+    ax.set_facecolor(wc_bg)
     ax.imshow(wc, interpolation="bilinear")
     ax.axis("off")
     plt.tight_layout()
@@ -347,8 +348,8 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 
 CSS = """
 body, .gradio-container {
-    background: #121212 !important;
-    color: #e1e1e1 !important;
+    background: #fff5f5 !important;
+    color: #3d1212 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif !important;
     font-size: 14px !important;
 }
@@ -359,49 +360,49 @@ body, .gradio-container {
 }
 
 /* Labels */
-label { color: #888 !important; font-size: 12px !important; font-weight: 500 !important; }
+label { color: #8c5a5a !important; font-size: 12px !important; font-weight: 500 !important; }
 
 /* Inputs */
 input, textarea {
-    background: #1e1e1e !important;
-    border: 1px solid #2e2e2e !important;
+    background: #ffffff !important;
+    border: 1px solid #e8c4c4 !important;
     border-radius: 6px !important;
-    color: #e1e1e1 !important;
+    color: #3d1212 !important;
     font-size: 13px !important;
     padding: 8px 10px !important;
 }
-input:focus, textarea:focus { border-color: #4a4a4a !important; outline: none !important; }
+input:focus, textarea:focus { border-color: #cc2936 !important; outline: none !important; }
 
 /* Button */
 .run-btn button {
-    background: #1e1e1e !important;
-    color: #e1e1e1 !important;
-    border: 1px solid #2e2e2e !important;
+    background: #cc2936 !important;
+    color: #ffffff !important;
+    border: 1px solid #cc2936 !important;
     border-radius: 6px !important;
     padding: 8px 0 !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     width: 100% !important;
     cursor: pointer !important;
-    transition: border-color 150ms !important;
+    transition: background 150ms ease !important;
 }
-.run-btn button:hover { border-color: #3fb950 !important; color: #3fb950 !important; }
+.run-btn button:hover { background: #a82030 !important; border-color: #a82030 !important; }
 
 /* Checkbox */
 input[type=checkbox] {
     appearance: none !important;
     width: 14px !important;
     height: 14px !important;
-    border: 1px solid #3a3a3a !important;
+    border: 1px solid #e8c4c4 !important;
     border-radius: 3px !important;
-    background: #1e1e1e !important;
+    background: #ffffff !important;
     cursor: pointer !important;
     position: relative !important;
     transition: background 150ms ease, border-color 150ms ease !important;
 }
 input[type=checkbox]:checked {
-    background: #3fb950 !important;
-    border-color: #3fb950 !important;
+    background: #cc2936 !important;
+    border-color: #cc2936 !important;
 }
 input[type=checkbox]:checked::after {
     content: '' !important;
@@ -410,19 +411,19 @@ input[type=checkbox]:checked::after {
     top: 1px !important;
     width: 4px !important;
     height: 8px !important;
-    border: 2px solid #121212 !important;
+    border: 2px solid #ffffff !important;
     border-top: none !important;
     border-left: none !important;
     transform: rotate(45deg) !important;
 }
 
 /* Slider */
-input[type=range] { accent-color: #3fb950 !important; }
+input[type=range] { accent-color: #cc2936 !important; }
 
 /* Plots */
 .gr-plot {
-    background: #1e1e1e !important;
-    border: 1px solid #2e2e2e !important;
+    background: #ffffff !important;
+    border: 1px solid #e8c4c4 !important;
     border-radius: 6px !important;
     padding: 8px !important;
 }
@@ -430,39 +431,39 @@ input[type=range] { accent-color: #3fb950 !important; }
 /* Section title */
 .section-title {
     font-size: 12px;
-    color: #666;
+    color: #8c5a5a;
     font-weight: 500;
     padding: 16px 0 6px 0;
-    border-bottom: 1px solid #2e2e2e;
+    border-bottom: 1px solid #e8c4c4;
     margin-bottom: 8px;
 }
 
 /* Summary markdown */
 .gr-markdown {
-    background: #1e1e1e !important;
-    border: 1px solid #2e2e2e !important;
+    background: #ffffff !important;
+    border: 1px solid #e8c4c4 !important;
     border-radius: 6px !important;
     padding: 14px 16px !important;
     font-size: 13px !important;
 }
-.gr-markdown h2 { font-size: 14px !important; color: #e1e1e1 !important; font-weight: 600 !important; margin-bottom: 8px !important; border: none !important; }
-.gr-markdown h3 { font-size: 12px !important; color: #666 !important; font-weight: 500 !important; margin: 12px 0 4px !important; }
+.gr-markdown h2 { font-size: 14px !important; color: #3d1212 !important; font-weight: 600 !important; margin-bottom: 8px !important; border: none !important; }
+.gr-markdown h3 { font-size: 12px !important; color: #8c5a5a !important; font-weight: 500 !important; margin: 12px 0 4px !important; }
 .gr-markdown table { font-size: 12px !important; }
-.gr-markdown th { color: #666 !important; font-weight: 500 !important; padding: 4px 8px !important; border-bottom: 1px solid #2e2e2e !important; text-align: left !important; }
-.gr-markdown td { color: #c9c9c9 !important; padding: 4px 8px !important; border-bottom: 1px solid #2e2e2e !important; }
+.gr-markdown th { color: #8c5a5a !important; font-weight: 500 !important; padding: 4px 8px !important; border-bottom: 1px solid #e8c4c4 !important; text-align: left !important; }
+.gr-markdown td { color: #3d1212 !important; padding: 4px 8px !important; border-bottom: 1px solid #e8c4c4 !important; }
 
 /* Dataframe */
-.gr-dataframe { background: #1e1e1e !important; border: 1px solid #2e2e2e !important; border-radius: 6px !important; }
-.gr-dataframe th { background: #1e1e1e !important; color: #666 !important; font-size: 11px !important; padding: 6px 8px !important; border-bottom: 1px solid #2e2e2e !important; }
-.gr-dataframe td { color: #c9c9c9 !important; font-size: 12px !important; padding: 5px 8px !important; border-bottom: 1px solid #2e2e2e !important; }
+.gr-dataframe { background: #ffffff !important; border: 1px solid #e8c4c4 !important; border-radius: 6px !important; }
+.gr-dataframe th { background: #fff0f0 !important; color: #8c5a5a !important; font-size: 11px !important; padding: 6px 8px !important; border-bottom: 1px solid #e8c4c4 !important; }
+.gr-dataframe td { color: #3d1212 !important; font-size: 12px !important; padding: 5px 8px !important; border-bottom: 1px solid #f0d0d0 !important; }
 
 /* File */
-.gr-file { background: #1e1e1e !important; border: 1px solid #2e2e2e !important; border-radius: 6px !important; }
+.gr-file { background: #ffffff !important; border: 1px solid #e8c4c4 !important; border-radius: 6px !important; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #e8c4c4; border-radius: 3px; }
 
 /* Hide HF popup */
 .gradio-container ~ div, div[data-testid="share-btn"],
