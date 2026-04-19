@@ -613,8 +613,19 @@ div[class*="dataframe"] td {
     border-bottom: 1px solid #fce4e4 !important;
 }
 
-/* File */
-.gr-file, div[class*="file"] { background: #ffffff !important; border: 1px solid #f0c8c8 !important; border-radius: 6px !important; }
+/* File download */
+.gr-file, div[class*="file"], div[class*="upload"],
+.file-preview, .file-name, div[class*="file-preview"] {
+    background: #ffffff !important;
+    border: 1px solid #f0c8c8 !important;
+    border-radius: 6px !important;
+    color: #4a1a1a !important;
+}
+div[class*="file"] span, div[class*="file"] p,
+.file-name span, div[class*="download"] {
+    color: #4a1a1a !important;
+    background: #ffffff !important;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
