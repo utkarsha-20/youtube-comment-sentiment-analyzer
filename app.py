@@ -343,6 +343,9 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 | Negative | {neg_count} ({round(neg_count/total*100, 1)}%) |
 | Avg Confidence | {avg_conf} |
 
+_Note: YouTube's API only returns top-level comments that pass its spam filter. Replies and spam-filtered comments are excluded, so the count may be lower than what you see on YouTube._
+
+
 ### Top Positive Comments
 """
     top_pos = df[df["sentiment"] == "positive"].nlargest(3, "confidence")
