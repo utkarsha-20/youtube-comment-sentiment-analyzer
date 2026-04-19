@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from transformers import pipeline
 import tempfile
-import yt_dlp
+import requests
+import os
 
 # --- Load NLP model once ---
 print("Loading sentiment analysis model...")
@@ -41,63 +42,90 @@ def clean_youtube_url(url):
     return url
 
 
-def scrape_comments(video_url, max_comments, fetch_all=False):
-    """Scrape YouTube comments using yt-dlp."""
-    video_url = clean_youtube_url(video_url)
-    print(f"[scraper] Starting scrape for: {video_url}")
-
-    limit = None if fetch_all else max_comments
-
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "extract_flat": False,
-        "skip_download": True,
-        "getcomments": True,
-        "extractor_args": {
-            "youtube": {
-                "max_comments": [str(limit) if limit else "all"],
-                "comment_sort": ["top"],
-                "player_client": ["android", "web"],
-            }
-        },
-        "http_headers": {
-            "User-Agent": "Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36",
-        },
-    }
-
+def get_video_title(video_id, api_key):
+    """Fetch video title using YouTube Data API v3."""
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            print("[scraper] Extracting info with yt-dlp...")
-            info = ydl.extract_info(video_url, download=False)
+        url = "https://www.googleapis.com/youtube/v3/videos"
+        params = {"part": "snippet", "id": video_id, "key": api_key}
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+        items = data.get("items", [])
+        if items:
+            return items[0]["snippet"]["title"]
     except Exception as e:
-        import traceback
-        print(f"[scraper] yt-dlp FAILED: {type(e).__name__}: {e}")
-        traceback.print_exc()
-        return pd.DataFrame()
+        print(f"[scraper] Could not fetch title: {e}")
+    return "Unknown Video"
 
-    raw_comments = info.get("comments") or []
-    print(f"[scraper] yt-dlp returned {len(raw_comments)} comments")
+
+def scrape_comments(video_url, max_comments, fetch_all=False):
+    """Fetch YouTube comments using YouTube Data API v3."""
+    api_key = os.environ.get("YOUTUBE_API_KEY", "")
+    if not api_key:
+        print("[scraper] ERROR: YOUTUBE_API_KEY not set")
+        return pd.DataFrame(), "Unknown Video"
+
+    video_url = clean_youtube_url(video_url)
+    # Extract video ID
+    video_id = video_url.split("v=")[1] if "v=" in video_url else ""
+    print(f"[scraper] Starting scrape for video_id: {video_id}")
+
+    title = get_video_title(video_id, api_key)
+    print(f"[scraper] Video title: {title}")
 
     comments_data = []
-    for c in raw_comments:
+    next_page_token = None
+    limit = max_comments if not fetch_all else 999999
+
+    while len(comments_data) < limit:
         try:
-            text = str(c.get("text", "")).strip()
-            if not text:
-                continue
-            comments_data.append({
-                "comment": text,
-                "author": str(c.get("author", "Unknown")),
-                "date": str(c.get("timestamp", "N/A")),
-                "likes": c.get("like_count", 0) or 0,
-            })
-            if not fetch_all and len(comments_data) >= max_comments:
+            params = {
+                "part": "snippet",
+                "videoId": video_id,
+                "maxResults": min(100, limit - len(comments_data)),
+                "order": "relevance",
+                "key": api_key,
+            }
+            if next_page_token:
+                params["pageToken"] = next_page_token
+
+            r = requests.get(
+                "https://www.googleapis.com/youtube/v3/commentThreads",
+                params=params,
+                timeout=15,
+            )
+            data = r.json()
+
+            if "error" in data:
+                print(f"[scraper] API error: {data['error']['message']}")
                 break
-        except (UnicodeError, ValueError):
-            continue
+
+            items = data.get("items", [])
+            if not items:
+                break
+
+            for item in items:
+                snippet = item["snippet"]["topLevelComment"]["snippet"]
+                comments_data.append({
+                    "comment": str(snippet.get("textDisplay", "")).strip(),
+                    "author": str(snippet.get("authorDisplayName", "Unknown")),
+                    "date": str(snippet.get("publishedAt", "N/A"))[:10],
+                    "likes": snippet.get("likeCount", 0) or 0,
+                })
+
+            next_page_token = data.get("nextPageToken")
+            print(f"[scraper] Fetched {len(comments_data)} comments so far...")
+
+            if not next_page_token:
+                break
+
+        except Exception as e:
+            import traceback
+            print(f"[scraper] FAILED: {type(e).__name__}: {e}")
+            traceback.print_exc()
+            break
 
     print(f"[scraper] Final result: {len(comments_data)} comments")
-    return pd.DataFrame(comments_data)
+    return pd.DataFrame(comments_data), title
 
 
 def analyze_sentiment(df):
@@ -224,16 +252,16 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     max_comments = int(max_comments)
 
     # Step 1: Scrape
-    progress(0.0, desc="Step 1/4: Scraping comments from YouTube...")
+    progress(0.0, desc="Step 1/4: Fetching comments from YouTube...")
     try:
-        df = scrape_comments(video_url.strip(), max_comments, fetch_all)
+        df, video_title = scrape_comments(video_url.strip(), max_comments, fetch_all)
     except Exception as e:
         import traceback
         traceback.print_exc()
         return f"Scraping failed: {type(e).__name__}: {e}", None, None, None, None, None, None
 
     if df.empty:
-        return f"No comments found for URL: {clean_youtube_url(video_url.strip())} — the video may have comments disabled or YouTube is blocking this server.", None, None, None, None, None, None
+        return f"No comments found. The video may have comments disabled or the URL is invalid.", None, None, None, None, None, None
 
     # Step 2: Sentiment Analysis (batch processing — fast)
     progress(0.3, desc=f"Step 2/4: Analyzing sentiment of {len(df)} comments...")
@@ -247,7 +275,7 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     neu_count = len(df[df["sentiment"] == "neutral"])
     avg_conf = round(df["confidence"].mean(), 3)
 
-    summary = f"""## Results
+    summary = f"""## {video_title}
 
 | Metric | Value |
 |--------|-------|
