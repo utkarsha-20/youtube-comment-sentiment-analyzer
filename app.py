@@ -89,19 +89,29 @@ def analyze_sentiment(df):
     return df
 
 
+CHART_BG = "#161b22"
+CHART_FG = "#c9d1d9"
+CHART_GRID = "#21262d"
+COLOR_POS = "#3fb950"
+COLOR_NEG = "#f78166"
+
 def create_bar_chart(df):
     """Create sentiment distribution bar chart."""
     counts = df["sentiment"].value_counts()
-    colors = {"POSITIVE": "#2ecc71", "NEGATIVE": "#e74c3c"}
-    bar_colors = [colors.get(l, "#95a5a6") for l in counts.index]
+    colors = {"POSITIVE": COLOR_POS, "NEGATIVE": COLOR_NEG}
+    bar_colors = [colors.get(l, "#8b949e") for l in counts.index]
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.bar(counts.index, counts.values, color=bar_colors, edgecolor="white", linewidth=1.5)
+    fig, ax = plt.subplots(figsize=(6, 4), facecolor=CHART_BG)
+    ax.set_facecolor(CHART_BG)
+    ax.bar(counts.index, counts.values, color=bar_colors, edgecolor=CHART_BG, linewidth=1, width=0.5)
     for i, (label, val) in enumerate(zip(counts.index, counts.values)):
         pct = round(val / len(df) * 100, 1)
-        ax.text(i, val + 1, f"{val} ({pct}%)", ha="center", fontweight="bold", fontsize=11)
-    ax.set_ylabel("Number of Comments")
-    ax.set_title("Sentiment Distribution")
+        ax.text(i, val + 1, f"{val} ({pct}%)", ha="center", fontsize=11, color=CHART_FG)
+    ax.set_ylabel("Comments", color="#8b949e", fontsize=12)
+    ax.tick_params(colors=CHART_FG)
+    ax.spines[:].set_color(CHART_GRID)
+    ax.yaxis.grid(True, color=CHART_GRID, linewidth=0.5)
+    ax.set_axisbelow(True)
     plt.tight_layout()
     return fig
 
@@ -109,20 +119,20 @@ def create_bar_chart(df):
 def create_pie_chart(df):
     """Create sentiment pie chart."""
     counts = df["sentiment"].value_counts()
-    colors = {"POSITIVE": "#2ecc71", "NEGATIVE": "#e74c3c"}
-    pie_colors = [colors.get(l, "#95a5a6") for l in counts.index]
+    colors = {"POSITIVE": COLOR_POS, "NEGATIVE": COLOR_NEG}
+    pie_colors = [colors.get(l, "#8b949e") for l in counts.index]
 
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(5, 5), facecolor=CHART_BG)
+    ax.set_facecolor(CHART_BG)
     ax.pie(
         counts.values,
         labels=counts.index,
         colors=pie_colors,
         autopct="%1.1f%%",
         startangle=140,
-        textprops={"fontsize": 12},
-        wedgeprops={"edgecolor": "white", "linewidth": 2},
+        textprops={"fontsize": 12, "color": CHART_FG},
+        wedgeprops={"edgecolor": CHART_BG, "linewidth": 2},
     )
-    ax.set_title("Sentiment Breakdown")
     plt.tight_layout()
     return fig
 
@@ -166,12 +176,12 @@ def create_wordcloud(df, sentiment, colormap):
         stop_words.update({"bad", "worst", "terrible", "horrible", "hate", "boring",
                            "waste", "poor", "ugly", "stupid", "awful", "annoying"})
 
-    wc = WordCloud(width=800, height=400, background_color="white", colormap=colormap,
+    wc = WordCloud(width=800, height=400, background_color=CHART_BG, colormap=colormap,
                    max_words=80, stopwords=stop_words).generate(text)
-    fig, ax = plt.subplots(figsize=(8, 4))
+    fig, ax = plt.subplots(figsize=(8, 4), facecolor=CHART_BG)
+    ax.set_facecolor(CHART_BG)
     ax.imshow(wc, interpolation="bilinear")
     ax.axis("off")
-    ax.set_title(f"{sentiment} Comments — Word Cloud", fontsize=14, fontweight="bold")
     plt.tight_layout()
     return fig
 
@@ -243,66 +253,260 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
     return summary, bar_chart, pie_chart, wc_positive, wc_negative, display_df, tmp.name
 
 
+CSS = """
+* { box-sizing: border-box; }
+
+body, .gradio-container {
+    background: #0d1117 !important;
+    color: #c9d1d9 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-size: 14px !important;
+}
+
+/* Top bar */
+.app-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #21262d;
+    margin-bottom: 24px;
+}
+.app-header h1 {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #f0f6fc !important;
+    margin: 0 0 4px 0 !important;
+}
+.app-header p {
+    font-size: 13px !important;
+    color: #8b949e !important;
+    margin: 0 !important;
+}
+
+/* Input section */
+.input-section {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+/* Inputs */
+input, textarea, .gr-textbox textarea {
+    background: #0d1117 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px !important;
+    color: #c9d1d9 !important;
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+}
+input:focus, textarea:focus {
+    border-color: #58a6ff !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.1) !important;
+}
+
+/* Labels */
+label, .gr-form label {
+    color: #8b949e !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    margin-bottom: 6px !important;
+}
+
+/* Analyze button */
+.analyze-btn button {
+    background: #238636 !important;
+    color: #ffffff !important;
+    border: 1px solid #2ea043 !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    transition: background 150ms ease !important;
+}
+.analyze-btn button:hover {
+    background: #2ea043 !important;
+}
+
+/* Checkbox */
+.gr-checkbox label {
+    color: #c9d1d9 !important;
+    font-size: 13px !important;
+}
+
+/* Results markdown */
+.gr-markdown {
+    background: #161b22 !important;
+    border: 1px solid #21262d !important;
+    border-radius: 6px !important;
+    padding: 16px 20px !important;
+    color: #c9d1d9 !important;
+}
+.gr-markdown h2 {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #f0f6fc !important;
+    border-bottom: 1px solid #21262d !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+}
+.gr-markdown h3 {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #8b949e !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    margin: 16px 0 8px !important;
+}
+.gr-markdown table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 13px !important;
+}
+.gr-markdown th {
+    text-align: left !important;
+    color: #8b949e !important;
+    border-bottom: 1px solid #21262d !important;
+    padding: 6px 8px !important;
+    font-weight: 500 !important;
+}
+.gr-markdown td {
+    padding: 6px 8px !important;
+    border-bottom: 1px solid #21262d !important;
+    color: #c9d1d9 !important;
+}
+
+/* Plots */
+.gr-plot {
+    background: #161b22 !important;
+    border: 1px solid #21262d !important;
+    border-radius: 6px !important;
+    padding: 12px !important;
+}
+
+/* Dataframe */
+.gr-dataframe {
+    background: #161b22 !important;
+    border: 1px solid #21262d !important;
+    border-radius: 6px !important;
+}
+.gr-dataframe th {
+    background: #161b22 !important;
+    color: #8b949e !important;
+    font-size: 12px !important;
+    border-bottom: 1px solid #21262d !important;
+}
+.gr-dataframe td {
+    color: #c9d1d9 !important;
+    font-size: 13px !important;
+    border-bottom: 1px solid #21262d !important;
+}
+
+/* File download */
+.gr-file {
+    background: #161b22 !important;
+    border: 1px solid #21262d !important;
+    border-radius: 6px !important;
+}
+
+/* Section labels */
+.section-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #8b949e !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    margin: 20px 0 8px 0 !important;
+}
+
+/* Divider */
+.divider {
+    border: none !important;
+    border-top: 1px solid #21262d !important;
+    margin: 20px 0 !important;
+}
+
+/* Footer */
+.app-footer {
+    font-size: 12px !important;
+    color: #484f58 !important;
+    padding: 16px 0 8px !important;
+    border-top: 1px solid #21262d !important;
+    margin-top: 24px !important;
+}
+
+/* Slider */
+.gr-slider input[type=range] {
+    accent-color: #58a6ff !important;
+}
+"""
+
 # --- Gradio UI ---
 with gr.Blocks(
     title="YouTube Comment Sentiment Analyzer",
-    theme=gr.themes.Soft(primary_hue="red", secondary_hue="green"),
+    css=CSS,
 ) as demo:
 
-    gr.Markdown(
-        """
-        # YouTube Comment Sentiment Analyzer
-        **Web Scraping + NLP Pipeline**
+    gr.HTML("""
+    <div class="app-header">
+        <h1>YouTube Comment Sentiment Analyzer</h1>
+        <p>Paste a YouTube URL to scrape comments and analyze sentiment using NLP.</p>
+    </div>
+    """)
 
-        Paste any YouTube video URL → Scrape comments → Analyze sentiment → Visualize results
-        """
-    )
-
-    with gr.Row():
+    with gr.Group(elem_classes="input-section"):
         url_input = gr.Textbox(
-            label="YouTube Video URL",
+            label="Video URL",
             placeholder="https://www.youtube.com/watch?v=...",
-            scale=3,
+            show_label=True,
         )
-        count_input = gr.Slider(
-            minimum=50, maximum=5000, value=500, step=50,
-            label="Number of Comments (ignored if 'Fetch All' is checked)",
-            scale=1,
-        )
+        with gr.Row():
+            count_input = gr.Slider(
+                minimum=50, maximum=5000, value=500, step=50,
+                label="Comments to fetch",
+            )
+            fetch_all_input = gr.Checkbox(
+                label="Fetch all comments (ignores limit above)",
+                value=False,
+            )
+        with gr.Row(elem_classes="analyze-btn"):
+            analyze_btn = gr.Button("Analyze", variant="primary")
 
-    fetch_all_input = gr.Checkbox(
-        label="Fetch ALL comments (may take a few minutes for popular videos)",
-        value=False,
+    summary_output = gr.Markdown(visible=False)
+
+    with gr.Row():
+        bar_chart = gr.Plot(label="Distribution", show_label=True)
+        pie_chart = gr.Plot(label="Breakdown", show_label=True)
+
+    with gr.Row():
+        wc_pos = gr.Plot(label="Positive comments — word cloud", show_label=True)
+        wc_neg = gr.Plot(label="Negative comments — word cloud", show_label=True)
+
+    data_table = gr.Dataframe(
+        label="Comments",
+        wrap=True,
+        show_label=True,
     )
+    csv_download = gr.File(label="Download CSV", show_label=True)
 
-    analyze_btn = gr.Button("Analyze", variant="primary", size="lg")
+    gr.HTML("""
+    <div class="app-footer">
+        Web scraping (youtube-comment-downloader) &rarr; NLP (DistilBERT) &rarr; Visualization (matplotlib, wordcloud)
+    </div>
+    """)
 
-    # Output components
-    summary_output = gr.Markdown(label="Summary")
+    def analyze_and_show(*args):
+        result = analyze_video(*args)
+        summary = result[0]
+        rest = result[1:]
+        return (gr.update(value=summary, visible=True),) + rest
 
-    with gr.Row():
-        bar_chart = gr.Plot(label="Sentiment Distribution")
-        pie_chart = gr.Plot(label="Sentiment Breakdown")
-
-    with gr.Row():
-        wc_pos = gr.Plot(label="Positive Word Cloud")
-        wc_neg = gr.Plot(label="Negative Word Cloud")
-
-    data_table = gr.Dataframe(label="All Comments with Sentiment", wrap=True)
-    csv_download = gr.File(label="Download Results (CSV)")
-
-    # Connect button
     analyze_btn.click(
-        fn=analyze_video,
+        fn=analyze_and_show,
         inputs=[url_input, count_input, fetch_all_input],
         outputs=[summary_output, bar_chart, pie_chart, wc_pos, wc_neg, data_table, csv_download],
-    )
-
-    gr.Markdown(
-        """
-        ---
-        **How it works:** Web scraping (youtube-comment-downloader) → NLP (DistilBERT with batch processing) → Visualization (matplotlib, wordcloud)
-        """
     )
 
 demo.launch()
