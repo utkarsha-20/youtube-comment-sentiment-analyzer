@@ -48,40 +48,43 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     comments_data = []
     count = 0
 
-    # Extract video ID and use get_comments directly to avoid sorting errors
-    video_id = None
-    if "v=" in video_url:
-        video_id = video_url.split("v=")[1].split("&")[0]
-
-    comments = None
-    # Try multiple methods — some fail depending on the video
-    for method in [
-        lambda: downloader.get_comments(video_id) if video_id else None,
-        lambda: downloader.get_comments_from_url(video_url),
-    ]:
+    # Try sort_by=1 (popular) first, then sort_by=0 (recent)
+    # The error happens inside the generator, so we catch it during iteration
+    for sort in [1, 0]:
         try:
-            result = method()
-            if result is not None:
-                comments = result
-                break
-        except Exception:
+            comments = downloader.get_comments_from_url(video_url, sort_by=sort)
+            # Force the first item to trigger any sorting error early
+            first = next(comments, None)
+            if first is None:
+                continue
+            # First item worked — process it
+            text = first.get("text", "").strip()
+            if text:
+                comments_data.append({
+                    "comment": text,
+                    "author": first.get("author", "Unknown"),
+                    "date": first.get("time", "N/A"),
+                    "likes": first.get("votes", 0),
+                })
+                count += 1
+            # Continue with rest of comments
+            for comment in comments:
+                if not fetch_all and count >= max_comments:
+                    break
+                text = comment.get("text", "").strip()
+                if text:
+                    comments_data.append({
+                        "comment": text,
+                        "author": comment.get("author", "Unknown"),
+                        "date": comment.get("time", "N/A"),
+                        "likes": comment.get("votes", 0),
+                    })
+                    count += 1
+            break  # Success, stop trying other sort options
+        except (RuntimeError, StopIteration):
+            comments_data = []
+            count = 0
             continue
-
-    if comments is None:
-        return pd.DataFrame()
-
-    for comment in comments:
-        if not fetch_all and count >= max_comments:
-            break
-        text = comment.get("text", "").strip()
-        if text:
-            comments_data.append({
-                "comment": text,
-                "author": comment.get("author", "Unknown"),
-                "date": comment.get("time", "N/A"),
-                "likes": comment.get("votes", 0),
-            })
-            count += 1
 
     return pd.DataFrame(comments_data)
 
