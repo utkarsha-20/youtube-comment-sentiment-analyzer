@@ -18,7 +18,7 @@ import os
 print("Loading sentiment analysis model...")
 sentiment_model = pipeline(
     "sentiment-analysis",
-    model="lxyuan/distilbert-base-multilingual-cased-sentiments-student",
+    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
     device=-1,
     truncation=True,
     max_length=512,
@@ -128,6 +128,8 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     return pd.DataFrame(comments_data), title
 
 
+CONFIDENCE_THRESHOLD = 0.85
+
 def analyze_sentiment(df):
     """Run sentiment analysis in batches for speed."""
     comments = [str(text)[:512] for text in df["comment"]]
@@ -141,8 +143,26 @@ def analyze_sentiment(df):
         results = sentiment_model(batch, batch_size=batch_size)
         all_results.extend(results)
 
-    df["sentiment"] = [r["label"] for r in all_results]
-    df["confidence"] = [round(r["score"], 3) for r in all_results]
+    # Map model labels to positive/neutral/negative
+    label_map = {
+        "positive": "positive", "POSITIVE": "positive", "POS": "positive",
+        "negative": "negative", "NEGATIVE": "negative", "NEG": "negative",
+        "neutral": "neutral",   "NEUTRAL": "neutral",   "NEU": "neutral",
+    }
+
+    sentiments = []
+    confidences = []
+    for r in all_results:
+        label = label_map.get(r["label"], "neutral")
+        score = round(r["score"], 3)
+        # Low confidence → classify as neutral
+        if score < CONFIDENCE_THRESHOLD and label != "neutral":
+            label = "neutral"
+        sentiments.append(label)
+        confidences.append(score)
+
+    df["sentiment"] = sentiments
+    df["confidence"] = confidences
     return df
 
 
