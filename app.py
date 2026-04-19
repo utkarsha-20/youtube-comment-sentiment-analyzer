@@ -90,12 +90,12 @@ def analyze_sentiment(df):
     return df
 
 
-CHART_BG = "#161b22"
-CHART_FG = "#c9d1d9"
-CHART_GRID = "#21262d"
+CHART_BG = "#0f0f0f"
+CHART_FG = "#c9c9c9"
+CHART_GRID = "#2a2a2a"
 COLOR_POS = "#3fb950"
-COLOR_NEG = "#f78166"
-COLOR_NEU = "#8b949e"
+COLOR_NEG = "#e05c4b"
+COLOR_NEU = "#555555"
 
 def create_bar_chart(df):
     """Create sentiment distribution bar chart."""
@@ -260,15 +260,13 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { height: 100%; overflow: hidden; }
-
-body, .gradio-container {
-    background: #0d1117 !important;
-    color: #c9d1d9 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-    font-size: 14px !important;
+html, body, .gradio-container {
     height: 100vh !important;
     overflow: hidden !important;
+    background: #0f0f0f !important;
+    color: #e1e1e1 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    font-size: 13px !important;
 }
 
 .gradio-container {
@@ -276,211 +274,199 @@ body, .gradio-container {
     padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
-    height: 100vh !important;
 }
 
-/* Top toolbar */
+/* Toolbar */
 .toolbar {
-    height: 48px;
-    min-height: 48px;
-    border-bottom: 1px solid #21262d;
+    height: 44px;
+    min-height: 44px;
+    border-bottom: 1px solid #2a2a2a;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    gap: 16px;
-    background: #0d1117;
+    padding: 0 16px;
+    gap: 12px;
+    background: #0f0f0f;
+    flex-shrink: 0;
 }
-.toolbar-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f0f6fc;
-    white-space: nowrap;
-}
-.toolbar-sub {
-    font-size: 12px;
-    color: #484f58;
-}
+.toolbar-title { font-size: 13px; font-weight: 600; color: #f0f0f0; }
+.toolbar-sep { color: #3a3a3a; }
+.toolbar-sub { font-size: 12px; color: #555; }
 
-/* Main layout — two columns */
-.main-layout {
+/* Two-column body */
+.body-row {
     display: flex !important;
     flex: 1 !important;
-    height: calc(100vh - 48px) !important;
+    height: calc(100vh - 44px) !important;
     overflow: hidden !important;
     gap: 0 !important;
 }
 
-/* Left panel — input + stats */
-.left-panel {
-    width: 300px;
-    min-width: 300px;
-    border-right: 1px solid #21262d;
-    background: #0d1117;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 16px;
-    gap: 12px;
+/* Left sidebar */
+.left-col {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    border-right: 1px solid #2a2a2a !important;
+    background: #0f0f0f !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    padding: 14px !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
 }
 
-/* Right panel — tabs with charts */
-.right-panel {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    background: #0d1117;
+/* Right content */
+.right-col {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #0f0f0f !important;
+    min-width: 0 !important;
 }
 
-/* Stats row inside left panel */
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 12px;
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 6px;
-    font-size: 13px;
-}
-.stat-label { color: #8b949e; }
-.stat-value { color: #f0f6fc; font-weight: 500; }
-.stat-pos { color: #3fb950; font-weight: 500; }
-.stat-neg { color: #f78166; font-weight: 500; }
-.stat-neu { color: #8b949e; font-weight: 500; }
+/* Form fields */
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 11px; color: #666; font-weight: 500; letter-spacing: 0.02em; }
 
-/* Inputs */
-input, textarea {
-    background: #0d1117 !important;
-    border: 1px solid #30363d !important;
-    border-radius: 6px !important;
-    color: #c9d1d9 !important;
-    font-size: 13px !important;
-    padding: 7px 10px !important;
+input[type=text], textarea {
+    background: #1a1a1a !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 5px !important;
+    color: #e1e1e1 !important;
+    font-size: 12px !important;
+    padding: 7px 9px !important;
     width: 100% !important;
-}
-input:focus, textarea:focus {
-    border-color: #388bfd !important;
     outline: none !important;
 }
-
-/* Labels */
-label {
-    color: #8b949e !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    margin-bottom: 4px !important;
-    display: block !important;
-}
-
-/* Analyze button */
-.analyze-btn button {
-    background: #238636 !important;
-    color: #fff !important;
-    border: 1px solid #2ea043 !important;
-    border-radius: 6px !important;
-    padding: 7px 16px !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    transition: background 150ms ease !important;
-}
-.analyze-btn button:hover { background: #2ea043 !important; }
-
-/* Checkbox */
-.gr-checkbox label {
-    color: #c9d1d9 !important;
-    font-size: 12px !important;
-}
-
-/* Tabs */
-.gr-tab-nav {
-    border-bottom: 1px solid #21262d !important;
-    background: #0d1117 !important;
-    padding: 0 16px !important;
-}
-.gr-tab-nav button {
-    background: none !important;
-    border: none !important;
-    border-bottom: 2px solid transparent !important;
-    color: #8b949e !important;
-    font-size: 13px !important;
-    padding: 10px 12px !important;
-    cursor: pointer !important;
-}
-.gr-tab-nav button.selected {
-    color: #f0f6fc !important;
-    border-bottom-color: #f78166 !important;
-}
-
-/* Plots fill their tab */
-.gr-plot {
-    background: #0d1117 !important;
-    border: none !important;
-    height: 100% !important;
-    padding: 12px !important;
-}
-
-/* Dataframe */
-.gr-dataframe {
-    background: #0d1117 !important;
-    border: none !important;
-    font-size: 12px !important;
-}
-.gr-dataframe th {
-    background: #161b22 !important;
-    color: #8b949e !important;
-    font-size: 11px !important;
-    border-bottom: 1px solid #21262d !important;
-    padding: 6px 8px !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-}
-.gr-dataframe td {
-    color: #c9d1d9 !important;
-    font-size: 12px !important;
-    border-bottom: 1px solid #21262d !important;
-    padding: 6px 8px !important;
-}
-
-/* File download */
-.gr-file {
-    background: #161b22 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 6px !important;
-    font-size: 12px !important;
+input[type=text]:focus, textarea:focus {
+    border-color: #444 !important;
 }
 
 /* Slider */
-input[type=range] { accent-color: #388bfd !important; }
+input[type=range] { accent-color: #3fb950 !important; width: 100% !important; }
+.slider-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #555; }
 
-/* Markdown summary in left panel */
-.summary-md {
-    background: #161b22;
-    border: 1px solid #21262d;
-    border-radius: 6px;
-    padding: 12px;
+/* Checkbox */
+.gr-checkbox { display: flex; align-items: center; gap: 6px; }
+.gr-checkbox label { font-size: 12px !important; color: #888 !important; font-weight: 400 !important; }
+
+/* Analyze button */
+.run-btn button {
+    background: #1a1a1a !important;
+    color: #e1e1e1 !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 5px !important;
+    padding: 7px 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: border-color 150ms, color 150ms !important;
+}
+.run-btn button:hover {
+    border-color: #3fb950 !important;
+    color: #3fb950 !important;
+}
+
+/* Divider */
+.side-divider {
+    height: 1px;
+    background: #2a2a2a;
+    margin: 2px 0;
+}
+
+/* Stat rows */
+.stats-block { display: flex; flex-direction: column; gap: 1px; }
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #1e1e1e;
     font-size: 12px;
-    color: #c9d1d9;
-    line-height: 1.5;
 }
-.summary-md p { margin: 2px 0; }
+.stat-item:last-child { border-bottom: none; }
+.stat-key { color: #666; }
+.stat-val { color: #e1e1e1; font-variant-numeric: tabular-nums; }
+.val-pos { color: #3fb950; }
+.val-neg { color: #e05c4b; }
+.val-neu { color: #888; }
 
-/* Hide HF popup */
-.gradio-container ~ div, .embed-container,
-div[data-testid="share-btn"], .share-button, .built-with,
-.svelte-1ipelgc, .space-info, footer .svelte-1rjryqp,
-div.absolute.bottom-0, div.fixed.bottom-0,
-div[class*="space-info"], div[class*="embed"],
-.gradio-container + div {
-    display: none !important;
+/* Download link */
+.dl-link {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    padding-top: 4px;
 }
+
+/* Tabs */
+button[role=tab] {
+    background: none !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: #666 !important;
+    font-size: 12px !important;
+    padding: 9px 14px !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+}
+button[role=tab][aria-selected=true] {
+    color: #e1e1e1 !important;
+    border-bottom-color: #3fb950 !important;
+}
+div[role=tablist] {
+    border-bottom: 1px solid #2a2a2a !important;
+    padding: 0 12px !important;
+    background: #0f0f0f !important;
+    display: flex !important;
+    gap: 0 !important;
+}
+
+/* Plots */
+.gr-plot, div[data-testid="plot"] {
+    background: #0f0f0f !important;
+    border: none !important;
+    padding: 8px !important;
+}
+
+/* Dataframe */
+table { border-collapse: collapse !important; width: 100% !important; }
+thead th {
+    background: #161616 !important;
+    color: #555 !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    padding: 7px 10px !important;
+    border-bottom: 1px solid #2a2a2a !important;
+    text-align: left !important;
+}
+tbody td {
+    color: #c9c9c9 !important;
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    border-bottom: 1px solid #1e1e1e !important;
+}
+
+/* File */
+.gr-file { background: #1a1a1a !important; border: 1px solid #2a2a2a !important; border-radius: 5px !important; }
+
+/* Error text */
+.err-text { color: #e05c4b; font-size: 12px; padding: 8px 0; }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0d1117; }
-::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+
+/* Hide HF overlay */
+.gradio-container ~ div, div[data-testid="share-btn"],
+.share-button, .built-with, div.absolute.bottom-0,
+div.fixed.bottom-0, div[class*="space-info"] {
+    display: none !important;
+}
 """
 
 # --- Gradio UI ---
@@ -489,35 +475,38 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
     gr.HTML("""
     <div class="toolbar">
         <span class="toolbar-title">YouTube Comment Sentiment Analyzer</span>
-        <span class="toolbar-sub">web scraping + NLP</span>
+        <span class="toolbar-sep">/</span>
+        <span class="toolbar-sub">web scraping · NLP · DistilBERT</span>
     </div>
     """)
 
-    with gr.Row(elem_classes="main-layout"):
+    with gr.Row(elem_classes="body-row"):
 
-        # --- LEFT PANEL ---
-        with gr.Column(elem_classes="left-panel"):
+        # LEFT
+        with gr.Column(elem_classes="left-col"):
             url_input = gr.Textbox(
                 label="Video URL",
                 placeholder="https://www.youtube.com/watch?v=...",
                 lines=1,
+                show_label=True,
             )
             count_input = gr.Slider(
                 minimum=50, maximum=5000, value=500, step=50,
                 label="Comments to fetch",
             )
             fetch_all_input = gr.Checkbox(
-                label="Fetch all comments (ignores limit)",
+                label="Fetch all comments",
                 value=False,
             )
-            with gr.Row(elem_classes="analyze-btn"):
-                analyze_btn = gr.Button("Analyze", variant="primary")
+            with gr.Row(elem_classes="run-btn"):
+                analyze_btn = gr.Button("Analyze", variant="secondary")
 
+            gr.HTML('<div class="side-divider"></div>')
             summary_output = gr.HTML(value="", visible=False)
             csv_download = gr.File(label="Download CSV", visible=False)
 
-        # --- RIGHT PANEL ---
-        with gr.Column(elem_classes="right-panel"):
+        # RIGHT
+        with gr.Column(elem_classes="right-col"):
             with gr.Tabs():
                 with gr.Tab("Distribution"):
                     bar_chart = gr.Plot(show_label=False)
@@ -535,7 +524,7 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
         summary_text, bar, pie, wcp, wcn, table, csv_path = result
 
         if bar is None:
-            html = f'<div class="summary-md"><p style="color:#f78166">{summary_text}</p></div>'
+            html = f'<p class="err-text">{summary_text}</p>'
             return gr.update(value=html, visible=True), bar, pie, wcp, wcn, table, gr.update(visible=False)
 
         total = len(table)
@@ -543,14 +532,13 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
         neg = len(table[table["sentiment"] == "negative"]) if "sentiment" in table.columns else 0
         neu = len(table[table["sentiment"] == "neutral"]) if "sentiment" in table.columns else 0
 
-        html = f"""
-        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
-            <div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">{total}</span></div>
-            <div class="stat-row"><span class="stat-label">Positive</span><span class="stat-pos">{pos} ({round(pos/total*100,1) if total else 0}%)</span></div>
-            <div class="stat-row"><span class="stat-label">Neutral</span><span class="stat-neu">{neu} ({round(neu/total*100,1) if total else 0}%)</span></div>
-            <div class="stat-row"><span class="stat-label">Negative</span><span class="stat-neg">{neg} ({round(neg/total*100,1) if total else 0}%)</span></div>
-        </div>
-        """
+        html = f"""<div class="stats-block">
+            <div class="stat-item"><span class="stat-key">Total</span><span class="stat-val">{total}</span></div>
+            <div class="stat-item"><span class="stat-key">Positive</span><span class="stat-val val-pos">{pos} &nbsp;{round(pos/total*100,1) if total else 0}%</span></div>
+            <div class="stat-item"><span class="stat-key">Neutral</span><span class="stat-val val-neu">{neu} &nbsp;{round(neu/total*100,1) if total else 0}%</span></div>
+            <div class="stat-item"><span class="stat-key">Negative</span><span class="stat-val val-neg">{neg} &nbsp;{round(neg/total*100,1) if total else 0}%</span></div>
+        </div>"""
+
         return gr.update(value=html, visible=True), bar, pie, wcp, wcn, table, gr.update(value=csv_path, visible=True)
 
     analyze_btn.click(
