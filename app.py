@@ -655,7 +655,7 @@ with gr.Blocks(title="Brainrot Scanner", css=CSS, theme=gr.themes.Soft()) as dem
             <svg height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" fill="#d42f3b"/>
             </svg>
-            <span style="font-size: 32px; font-weight: 700; color: #d42f3b; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">Brainrot Scanner</span>
+            <span style="font-size: 32px; font-weight: 700; color: #d42f3b; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">Brainrot Scanner 🍿</span>
         </div>
         <p style="font-size: 14px; color: #9a5555; margin: 4px 0 0 42px; font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;">We read ALL the YouTube comments so you don't have to ✨</p>
     </div>
