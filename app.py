@@ -1,3 +1,4 @@
+
 """
 YouTube Comment Sentiment Analyzer — Gradio Web App
 ====================================================
@@ -257,154 +258,190 @@ def analyze_video(video_url, max_comments, fetch_all, progress=gr.Progress()):
 
 
 CSS = """
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; overflow: hidden; }
 
 body, .gradio-container {
     background: #0d1117 !important;
     color: #c9d1d9 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
     font-size: 14px !important;
+    height: 100vh !important;
+    overflow: hidden !important;
 }
 
-/* Top bar */
-.app-header {
-    padding: 20px 24px 16px;
+.gradio-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+}
+
+/* Top toolbar */
+.toolbar {
+    height: 48px;
+    min-height: 48px;
     border-bottom: 1px solid #21262d;
-    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    background: #0d1117;
 }
-.app-header h1 {
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    color: #f0f6fc !important;
-    margin: 0 0 4px 0 !important;
+.toolbar-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f0f6fc;
+    white-space: nowrap;
 }
-.app-header p {
-    font-size: 13px !important;
-    color: #8b949e !important;
-    margin: 0 !important;
+.toolbar-sub {
+    font-size: 12px;
+    color: #484f58;
 }
 
-/* Input section */
-.input-section {
+/* Main layout — two columns */
+.main-layout {
+    display: flex !important;
+    flex: 1 !important;
+    height: calc(100vh - 48px) !important;
+    overflow: hidden !important;
+    gap: 0 !important;
+}
+
+/* Left panel — input + stats */
+.left-panel {
+    width: 300px;
+    min-width: 300px;
+    border-right: 1px solid #21262d;
+    background: #0d1117;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 16px;
+    gap: 12px;
+}
+
+/* Right panel — tabs with charts */
+.right-panel {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #0d1117;
+}
+
+/* Stats row inside left panel */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
     background: #161b22;
     border: 1px solid #21262d;
     border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 16px;
+    font-size: 13px;
 }
+.stat-label { color: #8b949e; }
+.stat-value { color: #f0f6fc; font-weight: 500; }
+.stat-pos { color: #3fb950; font-weight: 500; }
+.stat-neg { color: #f78166; font-weight: 500; }
+.stat-neu { color: #8b949e; font-weight: 500; }
 
 /* Inputs */
-input, textarea, .gr-textbox textarea {
+input, textarea {
     background: #0d1117 !important;
     border: 1px solid #30363d !important;
     border-radius: 6px !important;
     color: #c9d1d9 !important;
-    font-size: 14px !important;
-    padding: 8px 12px !important;
+    font-size: 13px !important;
+    padding: 7px 10px !important;
+    width: 100% !important;
 }
 input:focus, textarea:focus {
-    border-color: #58a6ff !important;
+    border-color: #388bfd !important;
     outline: none !important;
-    box-shadow: 0 0 0 3px rgba(88,166,255,0.1) !important;
 }
 
 /* Labels */
-label, .gr-form label {
+label {
     color: #8b949e !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     font-weight: 500 !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
+    display: block !important;
 }
 
 /* Analyze button */
 .analyze-btn button {
     background: #238636 !important;
-    color: #ffffff !important;
+    color: #fff !important;
     border: 1px solid #2ea043 !important;
     border-radius: 6px !important;
-    padding: 8px 20px !important;
-    font-size: 14px !important;
+    padding: 7px 16px !important;
+    font-size: 13px !important;
     font-weight: 500 !important;
-    cursor: pointer !important;
     width: 100% !important;
+    cursor: pointer !important;
     transition: background 150ms ease !important;
 }
-.analyze-btn button:hover {
-    background: #2ea043 !important;
-}
+.analyze-btn button:hover { background: #2ea043 !important; }
 
 /* Checkbox */
 .gr-checkbox label {
     color: #c9d1d9 !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
 }
 
-/* Results markdown */
-.gr-markdown {
-    background: #161b22 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 6px !important;
-    padding: 16px 20px !important;
-    color: #c9d1d9 !important;
+/* Tabs */
+.gr-tab-nav {
+    border-bottom: 1px solid #21262d !important;
+    background: #0d1117 !important;
+    padding: 0 16px !important;
 }
-.gr-markdown h2 {
-    font-size: 15px !important;
-    font-weight: 600 !important;
+.gr-tab-nav button {
+    background: none !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    color: #8b949e !important;
+    font-size: 13px !important;
+    padding: 10px 12px !important;
+    cursor: pointer !important;
+}
+.gr-tab-nav button.selected {
     color: #f0f6fc !important;
-    border-bottom: 1px solid #21262d !important;
-    padding-bottom: 8px !important;
-    margin-bottom: 12px !important;
-}
-.gr-markdown h3 {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #8b949e !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    margin: 16px 0 8px !important;
-}
-.gr-markdown table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 13px !important;
-}
-.gr-markdown th {
-    text-align: left !important;
-    color: #8b949e !important;
-    border-bottom: 1px solid #21262d !important;
-    padding: 6px 8px !important;
-    font-weight: 500 !important;
-}
-.gr-markdown td {
-    padding: 6px 8px !important;
-    border-bottom: 1px solid #21262d !important;
-    color: #c9d1d9 !important;
+    border-bottom-color: #f78166 !important;
 }
 
-/* Plots */
+/* Plots fill their tab */
 .gr-plot {
-    background: #161b22 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 6px !important;
+    background: #0d1117 !important;
+    border: none !important;
+    height: 100% !important;
     padding: 12px !important;
 }
 
 /* Dataframe */
 .gr-dataframe {
-    background: #161b22 !important;
-    border: 1px solid #21262d !important;
-    border-radius: 6px !important;
+    background: #0d1117 !important;
+    border: none !important;
+    font-size: 12px !important;
 }
 .gr-dataframe th {
     background: #161b22 !important;
     color: #8b949e !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     border-bottom: 1px solid #21262d !important;
+    padding: 6px 8px !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
 }
 .gr-dataframe td {
     color: #c9d1d9 !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     border-bottom: 1px solid #21262d !important;
+    padding: 6px 8px !important;
 }
 
 /* File download */
@@ -412,122 +449,109 @@ label, .gr-form label {
     background: #161b22 !important;
     border: 1px solid #21262d !important;
     border-radius: 6px !important;
-}
-
-/* Section labels */
-.section-label {
     font-size: 12px !important;
-    font-weight: 600 !important;
-    color: #8b949e !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.06em !important;
-    margin: 20px 0 8px 0 !important;
-}
-
-/* Divider */
-.divider {
-    border: none !important;
-    border-top: 1px solid #21262d !important;
-    margin: 20px 0 !important;
-}
-
-/* Hide Hugging Face Space info popup */
-.gradio-container ~ div,
-.embed-container,
-div[data-testid="share-btn"],
-.share-button,
-.built-with,
-.svelte-1ipelgc,
-.space-info,
-footer .svelte-1rjryqp,
-.gr-prose.svelte-1ipelgc,
-.info.svelte-1ipelgc,
-div.absolute.bottom-0,
-div.fixed.bottom-0,
-.overflow-hidden.absolute,
-div[class*="space-info"],
-div[class*="embed"],
-.gradio-container + div {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* Footer */
-.app-footer {
-    font-size: 12px !important;
-    color: #484f58 !important;
-    padding: 16px 0 8px !important;
-    border-top: 1px solid #21262d !important;
-    margin-top: 24px !important;
 }
 
 /* Slider */
-.gr-slider input[type=range] {
-    accent-color: #58a6ff !important;
+input[type=range] { accent-color: #388bfd !important; }
+
+/* Markdown summary in left panel */
+.summary-md {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    color: #c9d1d9;
+    line-height: 1.5;
 }
+.summary-md p { margin: 2px 0; }
+
+/* Hide HF popup */
+.gradio-container ~ div, .embed-container,
+div[data-testid="share-btn"], .share-button, .built-with,
+.svelte-1ipelgc, .space-info, footer .svelte-1rjryqp,
+div.absolute.bottom-0, div.fixed.bottom-0,
+div[class*="space-info"], div[class*="embed"],
+.gradio-container + div {
+    display: none !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
 """
 
 # --- Gradio UI ---
-with gr.Blocks(
-    title="YouTube Comment Sentiment Analyzer",
-    css=CSS,
-) as demo:
+with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
 
     gr.HTML("""
-    <div class="app-header">
-        <h1>YouTube Comment Sentiment Analyzer</h1>
-        <p>Paste a YouTube URL to scrape comments and analyze sentiment using NLP.</p>
+    <div class="toolbar">
+        <span class="toolbar-title">YouTube Comment Sentiment Analyzer</span>
+        <span class="toolbar-sub">web scraping + NLP</span>
     </div>
     """)
 
-    with gr.Group(elem_classes="input-section"):
-        url_input = gr.Textbox(
-            label="Video URL",
-            placeholder="https://www.youtube.com/watch?v=...",
-            show_label=True,
-        )
-        with gr.Row():
+    with gr.Row(elem_classes="main-layout"):
+
+        # --- LEFT PANEL ---
+        with gr.Column(elem_classes="left-panel"):
+            url_input = gr.Textbox(
+                label="Video URL",
+                placeholder="https://www.youtube.com/watch?v=...",
+                lines=1,
+            )
             count_input = gr.Slider(
                 minimum=50, maximum=5000, value=500, step=50,
                 label="Comments to fetch",
             )
             fetch_all_input = gr.Checkbox(
-                label="Fetch all comments (ignores limit above)",
+                label="Fetch all comments (ignores limit)",
                 value=False,
             )
-        with gr.Row(elem_classes="analyze-btn"):
-            analyze_btn = gr.Button("Analyze", variant="primary")
+            with gr.Row(elem_classes="analyze-btn"):
+                analyze_btn = gr.Button("Analyze", variant="primary")
 
-    summary_output = gr.Markdown(visible=False)
+            summary_output = gr.HTML(value="", visible=False)
+            csv_download = gr.File(label="Download CSV", visible=False)
 
-    with gr.Row():
-        bar_chart = gr.Plot(label="Distribution", show_label=True)
-        pie_chart = gr.Plot(label="Breakdown", show_label=True)
+        # --- RIGHT PANEL ---
+        with gr.Column(elem_classes="right-panel"):
+            with gr.Tabs():
+                with gr.Tab("Distribution"):
+                    bar_chart = gr.Plot(show_label=False)
+                with gr.Tab("Breakdown"):
+                    pie_chart = gr.Plot(show_label=False)
+                with gr.Tab("Positive words"):
+                    wc_pos = gr.Plot(show_label=False)
+                with gr.Tab("Negative words"):
+                    wc_neg = gr.Plot(show_label=False)
+                with gr.Tab("Comments"):
+                    data_table = gr.Dataframe(wrap=True, show_label=False)
 
-    with gr.Row():
-        wc_pos = gr.Plot(label="Positive comments — word cloud", show_label=True)
-        wc_neg = gr.Plot(label="Negative comments — word cloud", show_label=True)
+    def analyze_and_show(video_url, max_comments, fetch_all, progress=gr.Progress()):
+        result = analyze_video(video_url, max_comments, fetch_all, progress)
+        summary_text, bar, pie, wcp, wcn, table, csv_path = result
 
-    data_table = gr.Dataframe(
-        label="Comments",
-        wrap=True,
-        show_label=True,
-    )
-    csv_download = gr.File(label="Download CSV", show_label=True)
+        if bar is None:
+            html = f'<div class="summary-md"><p style="color:#f78166">{summary_text}</p></div>'
+            return gr.update(value=html, visible=True), bar, pie, wcp, wcn, table, gr.update(visible=False)
 
-    gr.HTML("""
-    <div class="app-footer">
-        Web scraping (youtube-comment-downloader) &rarr; NLP (DistilBERT) &rarr; Visualization (matplotlib, wordcloud)
-    </div>
-    """)
+        total = len(table)
+        pos = len(table[table["sentiment"] == "positive"]) if "sentiment" in table.columns else 0
+        neg = len(table[table["sentiment"] == "negative"]) if "sentiment" in table.columns else 0
+        neu = len(table[table["sentiment"] == "neutral"]) if "sentiment" in table.columns else 0
 
-    def analyze_and_show(*args):
-        result = analyze_video(*args)
-        summary = result[0]
-        rest = result[1:]
-        return (gr.update(value=summary, visible=True),) + rest
+        html = f"""
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">{total}</span></div>
+            <div class="stat-row"><span class="stat-label">Positive</span><span class="stat-pos">{pos} ({round(pos/total*100,1) if total else 0}%)</span></div>
+            <div class="stat-row"><span class="stat-label">Neutral</span><span class="stat-neu">{neu} ({round(neu/total*100,1) if total else 0}%)</span></div>
+            <div class="stat-row"><span class="stat-label">Negative</span><span class="stat-neg">{neg} ({round(neg/total*100,1) if total else 0}%)</span></div>
+        </div>
+        """
+        return gr.update(value=html, visible=True), bar, pie, wcp, wcn, table, gr.update(value=csv_path, visible=True)
 
     analyze_btn.click(
         fn=analyze_and_show,
