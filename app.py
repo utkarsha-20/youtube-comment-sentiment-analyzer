@@ -8,6 +8,7 @@ Paste a YouTube URL → Scrape comments → NLP sentiment analysis → Visualize
 import gradio as gr
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from wordcloud import WordCloud
 from transformers import pipeline
 import tempfile
@@ -173,45 +174,55 @@ COLOR_POS = "#3fb950"
 COLOR_NEG = "#e05c4b"
 COLOR_NEU = "#666666"
 
+PLOTLY_LAYOUT = dict(
+    paper_bgcolor=CHART_BG,
+    plot_bgcolor=CHART_BG,
+    font=dict(color=CHART_FG, size=12),
+    margin=dict(l=40, r=20, t=20, b=40),
+    showlegend=False,
+)
+
+
 def create_bar_chart(df):
-    """Create sentiment distribution bar chart."""
-    counts = df["sentiment"].value_counts()
+    """Create sentiment distribution bar chart using Plotly."""
+    counts = df["sentiment"].value_counts().reindex(["positive", "neutral", "negative"]).dropna()
     colors = {"positive": COLOR_POS, "negative": COLOR_NEG, "neutral": COLOR_NEU}
     bar_colors = [colors.get(l, "#8b949e") for l in counts.index]
+    total = len(df)
+    labels = [f"{v} ({round(v/total*100,1)}%)" for v in counts.values]
 
-    fig, ax = plt.subplots(figsize=(6, 4), facecolor=CHART_BG)
-    ax.set_facecolor(CHART_BG)
-    ax.bar(counts.index, counts.values, color=bar_colors, edgecolor=CHART_BG, linewidth=1, width=0.5)
-    for i, (label, val) in enumerate(zip(counts.index, counts.values)):
-        pct = round(val / len(df) * 100, 1)
-        ax.text(i, val + 1, f"{val} ({pct}%)", ha="center", fontsize=11, color=CHART_FG)
-    ax.set_ylabel("Comments", color="#8b949e", fontsize=12)
-    ax.tick_params(colors=CHART_FG)
-    ax.spines[:].set_color(CHART_GRID)
-    ax.yaxis.grid(True, color=CHART_GRID, linewidth=0.5)
-    ax.set_axisbelow(True)
-    plt.tight_layout()
+    fig = go.Figure(go.Bar(
+        x=list(counts.index),
+        y=list(counts.values),
+        marker_color=bar_colors,
+        text=labels,
+        textposition="outside",
+        textfont=dict(color=CHART_FG, size=12),
+    ))
+    fig.update_layout(
+        **PLOTLY_LAYOUT,
+        yaxis=dict(gridcolor=CHART_GRID, zeroline=False, title="Comments", title_font=dict(color="#888")),
+        xaxis=dict(gridcolor=CHART_GRID, zeroline=False),
+        bargap=0.4,
+    )
     return fig
 
 
 def create_pie_chart(df):
-    """Create sentiment pie chart."""
-    counts = df["sentiment"].value_counts()
+    """Create sentiment pie chart using Plotly."""
+    counts = df["sentiment"].value_counts().reindex(["positive", "neutral", "negative"]).dropna()
     colors = {"positive": COLOR_POS, "negative": COLOR_NEG, "neutral": COLOR_NEU}
     pie_colors = [colors.get(l, "#8b949e") for l in counts.index]
 
-    fig, ax = plt.subplots(figsize=(5, 5), facecolor=CHART_BG)
-    ax.set_facecolor(CHART_BG)
-    ax.pie(
-        counts.values,
-        labels=counts.index,
-        colors=pie_colors,
-        autopct="%1.1f%%",
-        startangle=140,
-        textprops={"fontsize": 12, "color": CHART_FG},
-        wedgeprops={"edgecolor": CHART_BG, "linewidth": 2},
-    )
-    plt.tight_layout()
+    fig = go.Figure(go.Pie(
+        labels=list(counts.index),
+        values=list(counts.values),
+        marker=dict(colors=pie_colors, line=dict(color=CHART_BG, width=2)),
+        textfont=dict(color=CHART_FG, size=12),
+        hole=0.3,
+    ))
+    fig.update_layout(**PLOTLY_LAYOUT, showlegend=True,
+                      legend=dict(font=dict(color=CHART_FG)))
     return fig
 
 
