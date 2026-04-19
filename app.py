@@ -388,8 +388,8 @@ with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
 
     csv_download = gr.File(label="Download CSV")
 
-    def analyze_and_show(*args):
-        result = analyze_video(*args)
+    def analyze_and_show(video_url, max_comments, fetch_all, progress=gr.Progress()):
+        result = analyze_video(video_url, max_comments, fetch_all, progress)
         summary = result[0]
         rest = result[1:]
         return (gr.update(value=summary, visible=True),) + rest
