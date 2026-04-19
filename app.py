@@ -229,8 +229,9 @@ def create_wordcloud(df, sentiment, colormap):
     """Create word cloud for a specific sentiment with filtered words."""
     text = " ".join(df[df["sentiment"] == sentiment]["comment"].dropna().astype(str))
     if not text.strip():
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.text(0.5, 0.5, f"No {sentiment.lower()} comments", ha="center", va="center", fontsize=14)
+        fig, ax = plt.subplots(figsize=(8, 4), facecolor="#fff5f5")
+        ax.set_facecolor("#fff5f5")
+        ax.text(0.5, 0.5, f"No {sentiment.lower()} comments", ha="center", va="center", fontsize=14, color="#8c5a5a")
         ax.axis("off")
         return fig
 
@@ -421,12 +422,15 @@ input[type=checkbox]:checked::after {
 input[type=range] { accent-color: #cc2936 !important; }
 
 /* Plots */
+.gr-plot, .gr-plot > div, .js-plotly-plot, .plot-container, .plotly {
+    background: #fff5f5 !important;
+}
 .gr-plot {
-    background: #ffffff !important;
     border: 1px solid #e8c4c4 !important;
     border-radius: 6px !important;
     padding: 8px !important;
 }
+.gr-plot .modebar { background: transparent !important; }
 
 /* Section title */
 .section-title {
