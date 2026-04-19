@@ -1,5 +1,5 @@
 ---
-title: YouTube Comment Sentiment Analyzer
+title: Brainrot Scanner 🍿
 emoji: 🎬
 colorFrom: red
 colorTo: green

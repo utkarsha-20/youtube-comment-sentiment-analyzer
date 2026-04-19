@@ -471,9 +471,10 @@ div.fixed.bottom-0, div[class*="space-info"] { display: none !important; }
 """
 
 # --- Gradio UI ---
-with gr.Blocks(title="YouTube Comment Sentiment Analyzer", css=CSS) as demo:
+with gr.Blocks(title="🍿 Brainrot Scanner", css=CSS) as demo:
 
-    gr.Markdown("## YouTube Comment Sentiment Analyzer")
+    gr.Markdown("## 🍿 Brainrot Scanner")
+    gr.Markdown("We read ALL the YouTube comments so you don't have to ✨")
 
     with gr.Row():
         url_input = gr.Textbox(label="Video URL", placeholder="https://www.youtube.com/watch?v=...", lines=1, scale=3)
