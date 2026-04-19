@@ -48,27 +48,29 @@ def scrape_comments(video_url, max_comments, fetch_all=False):
     comments_data = []
     count = 0
 
-    # Try sort_by=1 (popular) first, then sort_by=0 (recent)
-    for sort in [1, 0]:
+    # Try sort_by=0 (recent) first, then sort_by=1 (popular)
+    for sort in [0, 1]:
         try:
             comments_data = []
             count = 0
             for comment in downloader.get_comments_from_url(video_url, sort_by=sort):
                 if not fetch_all and count >= max_comments:
                     break
-                text = comment.get("text", "").strip()
-                if text:
-                    comments_data.append({
-                        "comment": text,
-                        "author": comment.get("author", "Unknown"),
-                        "date": comment.get("time", "N/A"),
-                        "likes": comment.get("votes", 0),
-                    })
-                    count += 1
+                try:
+                    text = str(comment.get("text", "")).strip()
+                    if text:
+                        comments_data.append({
+                            "comment": text,
+                            "author": str(comment.get("author", "Unknown")),
+                            "date": str(comment.get("time", "N/A")),
+                            "likes": comment.get("votes", 0),
+                        })
+                        count += 1
+                except (UnicodeError, ValueError):
+                    continue
             if comments_data:
                 break
-        except Exception as e:
-            print(f"sort_by={sort} failed: {e}")
+        except Exception:
             comments_data = []
             continue
 
