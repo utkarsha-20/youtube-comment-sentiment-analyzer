@@ -9,6 +9,12 @@ app_file: app.py
 pinned: false
 ---
 
+# Brainrot Scanner 🍿
+
+**Live App → [https://utka-20-youtube-comment-sentiment-analyzer.hf.space](https://utka-20-youtube-comment-sentiment-analyzer.hf.space)**
+
+---
+
 # YouTube Comment Sentiment Analyzer
 
 A complete **Web Scraping + NLP** web application that scrapes YouTube comments and performs sentiment analysis.
